@@ -1,0 +1,53 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "myBuild",
+            "type": "shell",
+            "command": "javac",
+            "args": [
+                "-d", "${workspaceFolder}/bin/production",
+                "-classpath", "${workspaceFolder}/bin/production;",
+                "-sourcepath", "${workspaceFolder}/src",
+                "-bootclasspath", "C:/Program Files/Java/jdk1.8.0_192/jre/lib/rt.jar",
+                "-source", "1.6",
+                "-target", "1.6",
+                "${workspaceFolder}/src/sk/pa3kc/*.java"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "extract jars",
+            "type": "shell",
+            "command": "cd",
+            "args": [
+                "bin/production",
+                "&&",
+                "jar",
+                "-fx",
+                "${workspaceFolder}/lib/MyLibrary.jar"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "generate jar",
+            "type": "shell",
+            "command": "jar",
+            "args": [
+                "-cfve",
+                "bin/HTTPServer.jar",
+                "sk.pa3kc.Program",
+                "-C", "bin/production", "."
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": [
+                "extract jars",
+                "myBuild"
+            ],
+            "problemMatcher": []
+        }
+    ]
+}
