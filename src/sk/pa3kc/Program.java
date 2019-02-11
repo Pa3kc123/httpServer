@@ -20,6 +20,9 @@ public class Program
     public static final String NEWLINE = DefaultSystemPropertyStrings.LINE_SEPARATOR;
     public static String CWD;
     public static String SERVER_ROOT;
+    public static String[] fileNames;
+    public static String[] filePaths;
+    public static int fileCount;
 
     private static Device[] devices;
     private static int index = 0;
@@ -36,6 +39,20 @@ public class Program
         File serverDir = new File(SERVER_ROOT);
         if (serverDir.exists() == false)
             serverDir.mkdirs();
+
+        fileNames = serverDir.list();
+ 
+        File[] files = serverDir.listFiles();
+        filePaths = new String[files.length];
+ 
+        for (int i = 0; i < files.length; i++)
+            filePaths[i] = files[i].getAbsolutePath();
+
+        fileCount = fileNames.length;
+
+        System.out.print("CWD = " + CWD + NEWLINE);
+        System.out.print("SERVER_ROOT = " + SERVER_ROOT + NEWLINE);
+        System.out.print("FILE_COUNT = " + fileCount + NEWLINE);
     }
 
     public static void main(String[] args)
@@ -106,7 +123,7 @@ public class Program
                 if (ex instanceof SocketException)
                 {
                     System.err.print(ex.getClass().getName() + " -> " + ex.getMessage() + NEWLINE);
-                    continue;
+                    return;
                 }
 
                 ex.printStackTrace();

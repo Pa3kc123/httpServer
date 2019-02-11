@@ -4,8 +4,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static sk.pa3kc.Program.NEWLINE;
-
 public class HTTPRequest
 {
     private String[] propertyNames;
@@ -69,8 +67,10 @@ public class HTTPRequest
     
                 String[] args = this.buffer[i].split(": ", 2);
                 if (args.length == 2)
-                propertyNames.add(args[0]);
-                propertyValues.add(args[1]);
+                {
+                    propertyNames.add(args[0]);
+                    propertyValues.add(args[1]);
+                }
             }
 
             this.propertyNames = propertyNames.toArray(new String[0]);

@@ -52,7 +52,7 @@ public class HTTPResponse
 
     public void writeToOutput()
     {
-        writer.print(this.protocol + this.responseCode + NEWLINE);
+        writer.print(this.protocol + " " + this.responseCode + NEWLINE);
         for (int i = 0; i < this.propertyCount; i++)
             writer.print(this.propertyNames.get(i) + ": " + this.propertyValues.get(i) + NEWLINE);
         writer.print(NEWLINE);
