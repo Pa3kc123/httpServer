@@ -7,9 +7,9 @@
             "command": "javac",
             "args": [
                 "-d", "${workspaceFolder}/bin/production",
-                "-classpath", "${workspaceFolder}/bin/production;",
+                "-classpath", "${workspaceFolder}/bin/production",
                 "-sourcepath", "${workspaceFolder}/src",
-                "-bootclasspath", "C:/Program Files/Java/jdk1.8.0_192/jre/lib/rt.jar",
+                "-bootclasspath", "${env:JAVA_HOME}/jre/lib/rt.jar",
                 "-source", "1.6",
                 "-target", "1.6",
                 "${workspaceFolder}/src/sk/pa3kc/*.java"
@@ -19,11 +19,11 @@
         {
             "label": "extract jars",
             "type": "shell",
-            "command": "cd",
+            "options": {
+                "cwd": "${workspaceFolder}/bin/production"
+            },
+            "command": "jar",
             "args": [
-                "bin/production",
-                "&&",
-                "jar",
                 "-fx",
                 "${workspaceFolder}/lib/MyLibrary.jar"
             ],

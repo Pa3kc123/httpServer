@@ -4,111 +4,88 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import sk.pa3kc.mylibrary.Universal;
-
 import static sk.pa3kc.Program.NEWLINE;
 
 public class HTTPRequest
 {
-    private List<String> properties = new ArrayList<String>();
-    private List<String> values = new ArrayList<String>();
+    private String[] propertyNames;
+    private String[] propertyValues;
+    private int propertyCount;
 
     private final String method;
     private final String path;
     private final String protocol;
 
-    private char[] buffer;
-    private int index = 0;
+    private String[] buffer;
 
     public HTTPRequest(InputStream is)
     {
-        {
-            List<Integer> list = new ArrayList<Integer>();
-            try
-            {
-                int lastC = -1;
-                for (int c = is.read(); c != -1; c = is.read())
-                {
-                    if (lastC == '\n' && c == '\r') break;
-                    list.add(c);
-                    lastC = c;
-                }
-
-                Integer[] arr = list.toArray(new Integer[0]);
-                buffer = new char[arr.length];
-                for (int i = 0; i < arr.length; i++)
-                    buffer[i] = (char)arr[i].intValue();
-            }
-            catch (Throwable ex)
-            {
-                ex.printStackTrace();
-            }
-        }
-
-        this.method = getString(' ');
-        this.path = getString(' ');
-        this.protocol = getString(' ');
-
-        /*InputStreamReader streamReader = new InputStreamReader(is);
-        BufferedReader reader = new BufferedReader(streamReader);
-
-        {
-            String[] args = null;
-            try
-            {
-                args = reader.readLine().split(" ");
-            }
-            catch (Throwable ex)
-            {
-                ex.printStackTrace();
-            }
-
-            if (args == null)
-            {
-                this.method = null;
-                this.path = null;
-                this.protocol = null;
-            }
-            else
-            {
-                this.method = args[0];
-                this.path = args[1];
-                this.protocol = args[2];
-            }
-        }
-
         try
         {
-            for (String line = reader.readLine(); line != null; line = reader.readLine())
+            int lastC = -1;
+            StringBuilder builder = new StringBuilder();
+            List<String> list = new ArrayList<String>();
+
+            for (int c = is.read(); c != -1; c = is.read())
             {
-                String[] args = line.split(": ");
-                if (args.length == 2)
+                if (lastC == '\n' && c == '\r') break;
+                if (lastC == '\r' && c == '\n')
                 {
-                    this.properties.add(args[0]);
-                    this.values.add(args[1]);
+                    list.add(builder.toString());
+                    builder.delete(0, builder.length());
                 }
+                else builder.append((char)c);
+                lastC = c;
             }
+
+            this.buffer = list.toArray(new String[0]);
         }
         catch (Throwable ex)
         {
             ex.printStackTrace();
         }
 
-        Universal.closeStreams(reader, streamReader);*/
+        if (this.buffer != null && this.buffer.length != 0)
+        {
+            String[] args = this.buffer[0].split(" ");
+            this.method = args[0];
+            this.path = args[1];
+            this.protocol = args[2];
+        }
+        else
+        {
+            this.method = null;
+            this.path = null;
+            this.protocol = null;
+        }
+
+        {
+            List<String> propertyNames = new ArrayList<String>();
+            List<String> propertyValues = new ArrayList<String>();
+
+            for (int i = 1; i < this.buffer.length; i++)
+            {
+                if (this.buffer[i] == null) continue;
+    
+                String[] args = this.buffer[i].split(": ", 2);
+                if (args.length == 2)
+                propertyNames.add(args[0]);
+                propertyValues.add(args[1]);
+            }
+
+            this.propertyNames = propertyNames.toArray(new String[0]);
+            this.propertyValues = propertyValues.toArray(new String[0]);
+            this.propertyCount = this.propertyNames.length;
+        }
     }
 
-    public String getMethod() { return method; }
-    public String getPath() { return path; }
-    public String getProtocol() { return protocol; }
+    public String getMethod() { return this.method; }
+    public String getPath() { return this.path; }
+    public String getProtocol() { return this.protocol; }
 
-    private String getString(char until)
-    {
-        StringBuilder builder = new StringBuilder();
-        while (this.buffer[this.index] != until || this.buffer[this.index] != '\r')
-            builder.append(this.buffer[this.index++]);
-        this.index++;
-        return builder.toString();
-    }
+    public int getPropertyCount() { return this.propertyCount; }
+    public String[] getPropertyNames() { return this.propertyNames; }
+    public String[] getPropertyValues() { return this.propertyValues; }
 
     static class HTTPRequestMethod
     {

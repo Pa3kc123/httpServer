@@ -1,111 +1,124 @@
 package sk.pa3kc;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.net.BindException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Date;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.nio.channels.IllegalBlockingModeException;
 
 import sk.pa3kc.mylibrary.Universal;
+import sk.pa3kc.mylibrary.myregex.MyRegex;
 import sk.pa3kc.mylibrary.DefaultSystemPropertyStrings;
 import sk.pa3kc.mylibrary.Device;
 
 public class Program
 {
     public static final String NEWLINE = DefaultSystemPropertyStrings.LINE_SEPARATOR;
+    public static String CWD;
+    public static String SERVER_ROOT;
+
+    private static Device[] devices;
+    private static int index = 0;
+
     public static ServerSocket server;
+
+    public static void init()
+    {
+        String tmp = Program.class.getProtectionDomain().getCodeSource().getLocation().getFile();
+
+        CWD = MyRegex.Matches(tmp, "(.*)\\/.*.jar")[0];
+        SERVER_ROOT = CWD + "/web";
+
+        File serverDir = new File(SERVER_ROOT);
+        if (serverDir.exists() == false)
+            serverDir.mkdirs();
+    }
 
     public static void main(String[] args)
     {
-        Device[] devices = Universal.getUsableDevices();
+        init();
 
-        try
+        devices = Universal.getUsableDevices();
+
+        if (devices.length == 0)
         {
-            server = new ServerSocket(8080, 0, InetAddress.getByName(devices[0].getLocalIP().asFormattedString()));
+            System.err.print("No network devices are available" + NEWLINE);
+            return;
         }
-        catch (Throwable ex)
-        {
-            ex.printStackTrace();
-        }
 
-        while (true)
+        while (index <= devices.length)
         {
-            Socket tmpClient = null;
-
             try
             {
-                System.out.print("Awaiting client on " + server.getLocalSocketAddress() + " ... ");
-                tmpClient = server.accept();
-                System.out.print("CONNECTED" + NEWLINE);
+                server = new ServerSocket(8080, 0, InetAddress.getByName(devices[0].getLocalIP().asFormattedString()));
+                break;
+            }
+            catch (BindException ex)
+            {
+                System.out.print(ex.getClass().getName() + " -> " + ex.getMessage() + NEWLINE);
             }
             catch (Throwable ex)
             {
                 ex.printStackTrace();
             }
-
-            if (tmpClient == null) continue;
-
-            final Socket client = tmpClient;
-            new Thread(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    InputStream is = null;
-                    OutputStream os = null;
-
-                    try
-                    {
-                        is = client.getInputStream();
-                        os = client.getOutputStream();
-                    }
-                    catch (Throwable ex)
-                    {
-                        ex.printStackTrace();
-                    }
-                    finally
-                    {
-                        if (is == null || os == null)
-                        {
-                            if (is != null) Universal.closeStreams(is);
-                            if (os != null) Universal.closeStreams(os);
-                            return;
-                        }
-                    }
-
-                    HTTPRequest request = new HTTPRequest(is);
-
-                    String header = request.getProtocol() + " 200 OK\r\n\r\n";
-                    String body = "<p>" + new Date().toString() + "</p>";
-
-                    String result = (header + body);
-                    System.out.print("Sending: '" + result + "'" + NEWLINE);
-                    
-                    try
-                    {
-                        os.write(result.getBytes("UTF-8"));
-                    }
-                    catch (Throwable ex)
-                    {
-                        ex.printStackTrace();
-                    }
-
-                    Universal.closeStreams(os, is, client);
-                }
-            }).start();
-
-            System.out.print("-------------------------" + NEWLINE);
-            System.out.flush();
+            server = null;
         }
-    }
 
-    @Override
-    protected void finalize() throws Throwable
-    {
-        Universal.closeStreams(server);
-        super.finalize();
+        if (server == null)
+            System.err.print("No usable network devices are available" + NEWLINE);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                System.out.print(NEWLINE + "Closing server ... ");
+                Universal.closeStreams(server);
+                System.out.print("DONE" + NEWLINE);
+            }
+        }));
+
+        while (true)
+        {
+            try
+            {
+                System.out.print("Awaiting client on " + server.getLocalSocketAddress() + " ... ");
+                final Socket client = server.accept();
+                ConnectionHandler.handle(client);
+                System.out.print("CONNECTED (" + client.getInetAddress().getHostAddress() + ")" + NEWLINE);
+            }
+            catch (SecurityException ex)
+            {
+                System.err.print(ex.getClass().getName() + " -> " + ex.getMessage() + NEWLINE);
+            }
+            catch (IOException ex)
+            {
+                if (ex instanceof SocketTimeoutException)
+                {
+                    System.err.print(ex.getClass().getName() + " -> " + ex.getMessage() + NEWLINE);
+                    continue;
+                }
+
+                if (ex instanceof SocketException)
+                {
+                    System.err.print(ex.getClass().getName() + " -> " + ex.getMessage() + NEWLINE);
+                    continue;
+                }
+
+                ex.printStackTrace();
+            }
+            catch (IllegalBlockingModeException ex)
+            {
+                System.err.print(ex.getClass().getName() + " -> " + ex.getMessage() + NEWLINE);
+            }
+            catch (Throwable ex)
+            {
+                ex.printStackTrace();
+            }
+        }
     }
 }

@@ -1,0 +1,53 @@
+package sk.pa3kc.httpconstants;
+
+public final class HTTPResponseCodes
+{
+    public static final String Continue_100 = "100 Continue";
+    public static final String Switching_Protocols_101 = "101 Switching Protocols";
+    public static final String OK_200 = "200 OK";
+    public static final String Created_201 = "201 Created";
+    public static final String Accepted_202 = "202 Accepted";
+    public static final String Non_Authoritative_Information_203 = "203 Non-Authoritative Information";
+    public static final String No_Content_204 = "204 No Content";
+    public static final String Reset_Content_205 = "205 Reset Content";
+    public static final String Partial_Content_206 = "206 Partial Content";
+    public static final String Multiple_Choices_300 = "300 Multiple Choices";
+    public static final String Moved_Permanently_301 = "301 Moved Permanently";
+    public static final String Found_302 = "302 Found";
+    public static final String See_Other_303 = "303 See Other";
+    public static final String Not_Modified_304 = "304 Not Modified";
+    public static final String Temporary_Redirect_307 = "307 Temporary Redirect";
+    public static final String Permanent_Redirect_308 = "308 Permanent Redirect";
+    public static final String Bad_Request_400 = "400 Bad Request";
+    public static final String Unauthorized_401 = "401 Unauthorized";
+    public static final String Forbidden_403 = "403 Forbidden";
+    public static final String Not_Found_404 = "404 Not Found";
+    public static final String Method_Not_Allowed_405 = "405 Method Not Allowed";
+    public static final String Not_Acceptable_406 = "406 Not Acceptable";
+    public static final String Proxy_Authentication_Required_407 = "407 Proxy Authentication Required";
+    public static final String Request_Timeout_408 = "408 Request Timeout";
+    public static final String Conflict_409 = "409 Conflict";
+    public static final String Gone_410 = "410 Gone";
+    public static final String Length_Required_411 = "411 Length Required";
+    public static final String Precondition_Failed_412 = "412 Precondition Failed";
+    public static final String Payload_Too_Large_413 = "413 Payload Too Large";
+    public static final String URI_Too_Long_414 = "414 URI Too Long";
+    public static final String Unsupported_Media_Type_415 = "415 Unsupported Media Type";
+    public static final String Range_Not_Satisfiable_416 = "416 Range Not Satisfiable";
+    public static final String Expectation_Failed_417 = "417 Expectation Failed";
+    public static final String Im_a_teapot_418 = "418 Im a teapot";
+    public static final String Unprocessable_Entity_422 = "422 Unprocessable Entity";
+    public static final String Too_Early_425 = "425 Too Early";
+    public static final String Upgrade_Required_426 = "426 Upgrade Required";
+    public static final String Precondition_Required_428 = "428 Precondition Required";
+    public static final String Too_Many_Requests_429 = "429 Too Many Requests";
+    public static final String Request_Header_Fields_Too_Large_431 = "431 Request Header Fields Too Large";
+    public static final String Unavailable_For_Legal_Reasons_451 = "451 Unavailable For Legal Reasons";
+    public static final String Internal_Server_Error_500 = "500 Internal Server Error";
+    public static final String Not_Implemented_501 = "501 Not Implemented";
+    public static final String Bad_Gateway_502 = "502 Bad Gateway";
+    public static final String Service_Unavailable_503 = "503 Service Unavailable";
+    public static final String Gateway_Timeout_504 = "504 Gateway Timeout";
+    public static final String HTTP_Version_Not_Supported_505 = "505 HTTP Version Not Supported";
+    public static final String Network_Authentication_Required_511 = "511 Network Authentication Required";
+}
