@@ -1,2 +1,4 @@
-bin/
+bin/production/*
+bin/web/
+bin/*.jar
 lib/MyLibrary.jar

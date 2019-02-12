@@ -11,8 +11,6 @@ import sk.pa3kc.httpconstants.HTTPHeaders;
 import sk.pa3kc.httpconstants.HTTPResponseCodes;
 import sk.pa3kc.mylibrary.Universal;
 
-import static sk.pa3kc.Program.NEWLINE;
-
 public class ConnectionHandler
 {
     private ConnectionHandler() {}
@@ -47,12 +45,12 @@ public class ConnectionHandler
                 }
 
                 HTTPRequest request = new HTTPRequest(is);
-                HTTPResponse response = new HTTPResponse(os);
-
-                response.setProtocol(request.getProtocol());
-                response.setProperty(HTTPHeaders.Content_Type, "text/html");
                 if (request.getPath().equals("/") == true)
                 {
+                    HTTPResponse response = new HTTPResponse(os);
+
+                    response.setProtocol(request.getProtocol());
+                    response.setProperty(HTTPHeaders.Content_Type, "text/html");
                     response.setResponseCode(HTTPResponseCodes.OK_200);
 
                     StringBuilder builder = new StringBuilder();
@@ -79,30 +77,38 @@ public class ConnectionHandler
 
                 if (valid == true)
                 {
-                    FileInputStream fileStream = null;
-                    DataOutputStream dos = null;
+                    HTTPResponse response = new HTTPResponse(os);
+                    response.setProtocol(request.getProtocol());
+                    response.setResponseCode(HTTPResponseCodes.OK_200);
+                    response.setProperty(HTTPHeaders.Content_Disposition, "attachment; filename\"" + Program.fileNames[index] + "\"");
+                    response.setProperty(HTTPHeaders.Transfer_Encoding, "chunked");
 
-                    try
+                    File file = new File(Program.filePaths[index]);
                     {
-                        fileStream = new FileInputStream(new File(Program.filePaths[index]));
-                        dos = new DataOutputStream(os);
+                        String extension = null;
+                        int tmp = file.getAbsolutePath().lastIndexOf('.');
+                        
+                        if (tmp != -1)
+                        extension = new String(file.getAbsolutePath().getBytes(), tmp, file.getAbsolutePath().length() - tmp);
 
-                        int c = -1;
-                        while ((c = fileStream.read()) != -1)
-                            dos.write(c);
-                        dos.flush();
+                        if (extension != null && extension.equals("txt") == true)
+                            response.setProperty(HTTPHeaders.Content_Type, "text/plain");
+                        else
+                            //?response.setProperty(HTTPHeaders.Content_Type, java.net.URLConnection.guessContentTypeFromName(Program.fileNames[index]));
+                            response.setProperty(HTTPHeaders.Content_Type, "application/octet-stream");
                     }
-                    catch (Throwable ex)
-                    {
-                        ex.printStackTrace();
-                    }
-                    finally
-                    {
-                        Universal.closeStreams(dos, fileStream);
-                    }
+
+                    response.setProperty(HTTPHeaders.Content_Length, String.valueOf(file.length()));
+
+                    response.writeHeaderToOutput();
+                    response.writeBinaryFileToOutput(file);
                 }
                 else
                 {
+                    HTTPResponse response = new HTTPResponse(os);
+
+                    response.setProtocol(request.getProtocol());
+                    response.setProperty(HTTPHeaders.Content_Type, "text/html");
                     response.setBody("<html><body><p>ERROR</p></body></html>");
                     response.writeToOutput();
                 }
@@ -111,14 +117,5 @@ public class ConnectionHandler
             }
         });
         thread.start();
-
-        try
-        {
-            //thread.join();
-        }
-        catch (Throwable ex)
-        {
-            ex.printStackTrace();
-        }
     }
 }

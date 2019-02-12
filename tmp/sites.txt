@@ -1,0 +1,11 @@
+http://central.maven.org/maven2/
+http://maven.nikr.net/
+http://repo.maven.apache.org/maven2
+http://repo.spring.io/libs-milestone/
+http://repo.spring.io/plugins-release/
+http://repo1.maven.org/maven2
+https://dl.google.com/dl/android/maven2/
+https://jcenter.bintray.com/
+https://jitpack.io/
+https://maven.fabric.io/public/
+https://repo.maven.apache.org/maven2/

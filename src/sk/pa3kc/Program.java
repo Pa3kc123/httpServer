@@ -112,25 +112,22 @@ public class Program
             {
                 System.err.print(ex.getClass().getName() + " -> " + ex.getMessage() + NEWLINE);
             }
+            catch (SocketTimeoutException ex)
+            {
+                System.err.print(ex.getClass().getName() + " -> " + ex.getMessage() + NEWLINE);
+            }
+            catch (SocketException ex)
+            {
+                System.err.print(ex.getClass().getName() + " -> " + ex.getMessage() + NEWLINE);
+                return;
+            }
             catch (IOException ex)
             {
-                if (ex instanceof SocketTimeoutException)
-                {
-                    System.err.print(ex.getClass().getName() + " -> " + ex.getMessage() + NEWLINE);
-                    continue;
-                }
-
-                if (ex instanceof SocketException)
-                {
-                    System.err.print(ex.getClass().getName() + " -> " + ex.getMessage() + NEWLINE);
-                    return;
-                }
-
                 ex.printStackTrace();
             }
             catch (IllegalBlockingModeException ex)
             {
-                System.err.print(ex.getClass().getName() + " -> " + ex.getMessage() + NEWLINE);
+                ex.printStackTrace();
             }
             catch (Throwable ex)
             {
