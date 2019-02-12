@@ -5,13 +5,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import sk.pa3kc.httpconstants.HTTPResponseCodes;
-import sk.pa3kc.mylibrary.DefaultSystemPropertyStrings;
-import sk.pa3kc.mylibrary.Universal;
+import sk.pa3kc.mylibrary.util.StreamUtils;
 
 public class HTTPResponse
 {
@@ -25,12 +24,18 @@ public class HTTPResponse
     private List<String> propertyNames = new ArrayList<String>();
     private List<String> propertyValues = new ArrayList<String>();
     private int propertyCount = 0;
+    private List<String> scripts = new ArrayList<String>();
     private String body = "<p>No body specified</p>";
 
     public HTTPResponse(OutputStream os)
     {
         this.output = os;
         this.writer = new PrintWriter(os, false);
+    }
+
+    public void addScript(String... pathToJSFile)
+    {
+        this.scripts.addAll(Arrays.asList(pathToJSFile));
     }
 
     public void setProtocol(String protocol) { this.protocol = protocol; }
@@ -100,7 +105,7 @@ public class HTTPResponse
         }
         finally
         {
-            Universal.closeStreams(dos, fis);
+            StreamUtils.closeStreams(dos, fis);
         }
 
         writer.print(NEWLINE);
@@ -111,7 +116,7 @@ public class HTTPResponse
     @Override
     protected void finalize() throws Throwable
     {
-        Universal.closeStreams(writer);
+        StreamUtils.closeStreams(writer);
         super.finalize();
     }
 }

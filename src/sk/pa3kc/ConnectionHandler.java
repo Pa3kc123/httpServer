@@ -9,7 +9,7 @@ import java.net.Socket;
 
 import sk.pa3kc.httpconstants.HTTPHeaders;
 import sk.pa3kc.httpconstants.HTTPResponseCodes;
-import sk.pa3kc.mylibrary.Universal;
+import sk.pa3kc.mylibrary.util.StreamUtils;
 
 public class ConnectionHandler
 {
@@ -38,8 +38,8 @@ public class ConnectionHandler
                 {
                     if (is == null || os == null)
                     {
-                        if (is != null) Universal.closeStreams(is);
-                        if (os != null) Universal.closeStreams(os);
+                        if (is != null) StreamUtils.closeStreams(is);
+                        if (os != null) StreamUtils.closeStreams(os);
                         return;
                     }
                 }
@@ -55,21 +55,21 @@ public class ConnectionHandler
 
                     StringBuilder builder = new StringBuilder();
 
-                    for (int i = 0; i < Program.fileCount; i++)
-                        builder.append("<p><a href=\"" + Program.fileNames[i] + "\" download>" + Program.fileNames[i] + "</a></p>");
+                    for (int i = 0; i < Singleton.getInstance().getFileCount(); i++)
+                        builder.append("<p><a href=\"" + Singleton.getInstance().getFileNames()[i] + "\" download>" + Singleton.getInstance().getFileNames()[i] + "</a></p>");
 
                     response.setBody("<html><body>" + builder.toString() + "</body></html>");
                     response.writeToOutput();
 
-                    Universal.closeStreams(os, is, client);
+                    StreamUtils.closeStreams(os, is, client);
                     return;    
                 }
                 
                 String tmpPath = request.getPath().replaceFirst("/", "");
                 boolean valid = false;
                 int index = 0;
-                for (; index < Program.fileCount; index++)
-                if (Program.fileNames[index].equals(tmpPath) == true)
+                for (; index < Singleton.getInstance().getFileCount(); index++)
+                if (Singleton.getInstance().getFileNames()[index].equals(tmpPath) == true)
                 {
                     valid = true;
                     break;
@@ -80,10 +80,10 @@ public class ConnectionHandler
                     HTTPResponse response = new HTTPResponse(os);
                     response.setProtocol(request.getProtocol());
                     response.setResponseCode(HTTPResponseCodes.OK_200);
-                    response.setProperty(HTTPHeaders.Content_Disposition, "attachment; filename\"" + Program.fileNames[index] + "\"");
+                    response.setProperty(HTTPHeaders.Content_Disposition, "attachment; filename\"" + Singleton.getInstance().getFileNames()[index] + "\"");
                     response.setProperty(HTTPHeaders.Transfer_Encoding, "chunked");
 
-                    File file = new File(Program.filePaths[index]);
+                    File file = new File(Singleton.getInstance().getFilePaths()[index]);
                     {
                         String extension = null;
                         int tmp = file.getAbsolutePath().lastIndexOf('.');
@@ -113,7 +113,7 @@ public class ConnectionHandler
                     response.writeToOutput();
                 }
 
-                Universal.closeStreams(os, is, client);
+                StreamUtils.closeStreams(os, is, client);
             }
         });
         thread.start();

@@ -10,56 +10,39 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.channels.IllegalBlockingModeException;
 
-import sk.pa3kc.mylibrary.Universal;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
+
 import sk.pa3kc.mylibrary.myregex.MyRegex;
+import sk.pa3kc.mylibrary.net.Device;
+import sk.pa3kc.mylibrary.util.StreamUtils;
 import sk.pa3kc.mylibrary.DefaultSystemPropertyStrings;
-import sk.pa3kc.mylibrary.Device;
+
+import static sk.pa3kc.Singleton.NEWLINE;
 
 public class Program
 {
-    public static final String NEWLINE = DefaultSystemPropertyStrings.LINE_SEPARATOR;
-    public static String CWD;
-    public static String SERVER_ROOT;
-    public static String[] fileNames;
-    public static String[] filePaths;
-    public static int fileCount;
-
-    private static Device[] devices;
-    private static int index = 0;
-
-    public static ServerSocket server;
-
     public static void init()
     {
-        String tmp = Program.class.getProtectionDomain().getCodeSource().getLocation().getFile();
-
-        CWD = MyRegex.Matches(tmp, "(.*)\\/.*.jar")[0];
-        SERVER_ROOT = CWD + "/web";
-
-        File serverDir = new File(SERVER_ROOT);
+        File serverDir = new File(Singleton.getInstance().getWEB_ROOT());
         if (serverDir.exists() == false)
             serverDir.mkdirs();
 
-        fileNames = serverDir.list();
+        Singleton.getInstance().setFileNames(serverDir.list());
  
         File[] files = serverDir.listFiles();
-        filePaths = new String[files.length];
+        Singleton.getInstance().setFilePaths(new String[files.length]);
  
         for (int i = 0; i < files.length; i++)
-            filePaths[i] = files[i].getAbsolutePath();
+            Singleton.getInstance().getFilePaths()[i] = files[i].getAbsolutePath();
 
-        fileCount = fileNames.length;
+        Singleton.getInstance().setFileCount(Singleton.getInstance().getFileNames().length);
 
-        System.out.print("CWD = " + CWD + NEWLINE);
-        System.out.print("SERVER_ROOT = " + SERVER_ROOT + NEWLINE);
-        System.out.print("FILE_COUNT = " + fileCount + NEWLINE);
-    }
+        System.out.print("CWD = " + Singleton.getInstance().getCWD() + NEWLINE);
+        System.out.print("WEB_ROOT = " + Singleton.getInstance().getWEB_ROOT() + NEWLINE);
 
-    public static void main(String[] args)
-    {
-        init();
-
-        devices = Universal.getUsableDevices();
+        Device[] devices = Device.getUsableDevices();
 
         if (devices.length == 0)
         {
@@ -67,11 +50,12 @@ public class Program
             return;
         }
 
-        while (index <= devices.length)
+        for (int index = 0; index <= devices.length; index++)
         {
             try
             {
-                server = new ServerSocket(8080, 0, InetAddress.getByName(devices[0].getLocalIP().asFormattedString()));
+                Singleton.getInstance().setServer(new ServerSocket(8080, 0, InetAddress.getByName(devices[0].getLocalIP().asFormattedString())));
+                Singleton.getInstance().setDevice(devices[index]);
                 break;
             }
             catch (BindException ex)
@@ -82,10 +66,9 @@ public class Program
             {
                 ex.printStackTrace();
             }
-            server = null;
         }
 
-        if (server == null)
+        if (Singleton.getInstance().getServer() == null)
             System.err.print("No usable network devices are available" + NEWLINE);
 
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
@@ -94,17 +77,22 @@ public class Program
             public void run()
             {
                 System.out.print(NEWLINE + "Closing server ... ");
-                Universal.closeStreams(server);
+                StreamUtils.closeStreams(Singleton.getInstance().getServer());
                 System.out.print("DONE" + NEWLINE);
             }
         }));
+    }
+
+    public static void main(String[] args)
+    {
+        init();
 
         while (true)
         {
             try
             {
-                System.out.print("Awaiting client on " + server.getLocalSocketAddress() + " ... ");
-                final Socket client = server.accept();
+                System.out.print("Awaiting client on " + Singleton.getInstance().getServer().getLocalSocketAddress() + " ... ");
+                final Socket client = Singleton.getInstance().getServer().accept();
                 ConnectionHandler.handle(client);
                 System.out.print("CONNECTED (" + client.getInetAddress().getHostAddress() + ")" + NEWLINE);
             }
