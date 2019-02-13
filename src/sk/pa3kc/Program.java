@@ -10,14 +10,8 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.channels.IllegalBlockingModeException;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
-import javax.script.ScriptEngineManager;
-
-import sk.pa3kc.mylibrary.myregex.MyRegex;
 import sk.pa3kc.mylibrary.net.Device;
 import sk.pa3kc.mylibrary.util.StreamUtils;
-import sk.pa3kc.mylibrary.DefaultSystemPropertyStrings;
 
 import static sk.pa3kc.Singleton.NEWLINE;
 

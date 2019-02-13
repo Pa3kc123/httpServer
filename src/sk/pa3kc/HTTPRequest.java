@@ -1,8 +1,13 @@
 package sk.pa3kc;
 
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import sk.pa3kc.mylibrary.util.StreamUtils;
+
+import static sk.pa3kc.Singleton.NEWLINE;
 
 public class HTTPRequest
 {
@@ -76,6 +81,23 @@ public class HTTPRequest
             this.propertyNames = propertyNames.toArray(new String[0]);
             this.propertyValues = propertyValues.toArray(new String[0]);
             this.propertyCount = this.propertyNames.length;
+        }
+
+        FileWriter writer = null;
+        try
+        {
+            writer = new FileWriter(new java.io.File("output.log"), true);
+            for (String line : this.buffer)
+                writer.append(line);
+            writer.append("-------------------------" + NEWLINE);
+        }
+        catch (Throwable ex)
+        {
+            ex.printStackTrace();
+        }
+        finally
+        {
+            StreamUtils.closeStreams(writer);
         }
     }
 

@@ -1,8 +1,6 @@
 package sk.pa3kc;
 
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -45,7 +43,7 @@ public class ConnectionHandler
                 }
 
                 HTTPRequest request = new HTTPRequest(is);
-                if (request.getPath().equals("/") == true)
+                if (request.getPath() == null || request.getPath().equals("/") == true)
                 {
                     HTTPResponse response = new HTTPResponse(os);
 
