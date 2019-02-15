@@ -5,6 +5,18 @@
             "type": "java",
             "name": "Debug Program<HTTPServer>",
             "request": "launch",
+            "linux": {
+                "cwd": "${workspaceFolder}/bin/production",
+                "classPaths": [
+                    "${workspaceFolder}/bin/production"
+                ]
+            },
+            "windows": {
+                "cwd": "${workspaceFolder}\\bin\\production",
+                "classPaths": [
+                    "${workspaceFolder}\\bin\\production"
+                ]
+            },
             "mainClass": "sk.pa3kc.Program",
             "projectName": "HTTPServer"
         }

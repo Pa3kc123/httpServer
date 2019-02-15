@@ -54,7 +54,7 @@ public class ConnectionHandler
                     StringBuilder builder = new StringBuilder();
 
                     for (int i = 0; i < Singleton.getInstance().getFileCount(); i++)
-                        builder.append("<p><a href=\"" + Singleton.getInstance().getFileNames()[i] + "\" download>" + Singleton.getInstance().getFileNames()[i] + "</a></p>");
+                        builder.append("<p><a id=\"" + i + "\" href=\"" + Singleton.getInstance().getFileNames()[i] + "\" download>" + Singleton.getInstance().getFileNames()[i] + "</a></p>");
 
                     response.setBody("<html><body>" + builder.toString() + "</body></html>");
                     response.writeToOutput();

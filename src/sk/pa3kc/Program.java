@@ -9,9 +9,25 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.channels.IllegalBlockingModeException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
+import java.util.concurrent.TimeUnit;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
+
+import sk.pa3kc.mylibrary.myregex.MyRegex;
 import sk.pa3kc.mylibrary.net.Device;
 import sk.pa3kc.mylibrary.util.StreamUtils;
+import sk.pa3kc.mylibrary.DefaultSystemPropertyStrings;
 
 import static sk.pa3kc.Singleton.NEWLINE;
 
@@ -19,6 +35,61 @@ public class Program
 {
     public static void init()
     {
+        WatchService watchService = null;
+        try
+        {
+            watchService = FileSystems.getDefault().newWatchService();
+        }
+        catch (Throwable ex)
+        {
+            ex.printStackTrace();
+            System.exit(0);
+        }
+
+        Path path = Paths.get(Singleton.getInstance().getWEB_ROOT());
+        try
+        {
+            WatchEvent.Kind<Path>[] events = new WatchEvent.Kind[]
+            {
+                StandardWatchEventKinds.ENTRY_CREATE,
+                StandardWatchEventKinds.ENTRY_MODIFY,
+                StandardWatchEventKinds.ENTRY_DELETE
+            };
+            path.register(watchService, events);
+        }
+        catch (Throwable ex)
+        {
+            ex.printStackTrace();
+        }
+
+        while (true)
+        {
+            WatchKey key = null;
+            
+            try
+            {
+                key = watchService.take();
+            }
+            catch (Throwable ex)
+            {
+                ex.printStackTrace();
+            }
+
+            for (WatchEvent<?> event : key.pollEvents())
+            {
+                WatchEvent.Kind<?> kind = event.kind();
+
+                if (kind == StandardWatchEventKinds.OVERFLOW) continue;
+                if (kind == StandardWatchEventKinds.ENTRY_CREATE) System.out.print("ENTRY_CREATE");
+                if (kind == StandardWatchEventKinds.ENTRY_MODIFY) System.out.print("ENTRY_MODIFY");
+                if (kind == StandardWatchEventKinds.ENTRY_DELETE) System.out.print("ENTRY_DELETE");
+            }
+
+            if (key.reset() == false)
+                break;
+        }
+        System.exit(0);
+
         File serverDir = new File(Singleton.getInstance().getWEB_ROOT());
         if (serverDir.exists() == false)
             serverDir.mkdirs();

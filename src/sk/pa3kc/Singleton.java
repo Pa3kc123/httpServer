@@ -1,5 +1,6 @@
 package sk.pa3kc;
 
+import java.io.File;
 import java.net.ServerSocket;
 
 import sk.pa3kc.mylibrary.DefaultSystemPropertyStrings;
@@ -12,8 +13,13 @@ public class Singleton
     private static final Singleton instance = new Singleton();
     private Singleton()
     {
-        this.CWD = MyRegex.Matches(Program.class.getProtectionDomain().getCodeSource().getLocation().getFile(), "(.*)\\/.*.jar")[0];
+        String path = Program.class.getProtectionDomain().getCodeSource().getLocation().getFile().replaceFirst("\\/", "");
+        this.CWD = path.endsWith(".jar") == true ? MyRegex.Matches(path, "(.*)\\/.*.jar")[0] : path;
         this.WEB_ROOT = this.CWD + "/web";
+
+        File webRootFile = new File(this.WEB_ROOT);
+        if (webRootFile.exists() == false || webRootFile.isDirectory() == false)
+            webRootFile.mkdirs();
     }
     public static final Singleton getInstance() { return instance; }
     //endregion
@@ -27,7 +33,6 @@ public class Singleton
     private String[] fileNames;
     private String[] filePaths;
     private int fileCount;
-
     
     public static final String NEWLINE = DefaultSystemPropertyStrings.LINE_SEPARATOR;
     //endregion
