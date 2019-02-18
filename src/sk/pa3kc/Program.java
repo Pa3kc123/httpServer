@@ -1,6 +1,8 @@
 package sk.pa3kc;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.InetAddress;
@@ -9,7 +11,6 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.channels.IllegalBlockingModeException;
-import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,17 +18,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
-import java.util.concurrent.TimeUnit;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
-import javax.script.ScriptEngineManager;
-
-import sk.pa3kc.mylibrary.myregex.MyRegex;
 import sk.pa3kc.mylibrary.net.Device;
-import sk.pa3kc.mylibrary.util.StreamUtils;
-import sk.pa3kc.mylibrary.DefaultSystemPropertyStrings;
 
 import static sk.pa3kc.Singleton.NEWLINE;
 
@@ -35,65 +27,69 @@ public class Program
 {
     public static void init()
     {
-        WatchService watchService = null;
-        try
         {
-            watchService = FileSystems.getDefault().newWatchService();
-        }
-        catch (Throwable ex)
-        {
-            ex.printStackTrace();
-            System.exit(0);
-        }
-
-        Path path = Paths.get(Singleton.getInstance().getWEB_ROOT());
-        try
-        {
-            WatchEvent.Kind<Path>[] events = new WatchEvent.Kind[]
-            {
-                StandardWatchEventKinds.ENTRY_CREATE,
-                StandardWatchEventKinds.ENTRY_MODIFY,
-                StandardWatchEventKinds.ENTRY_DELETE
-            };
-            path.register(watchService, events);
-        }
-        catch (Throwable ex)
-        {
-            ex.printStackTrace();
-        }
-
-        while (true)
-        {
-            WatchKey key = null;
-            
             try
             {
-                key = watchService.take();
+                Singleton.getInstance().setWatchService(FileSystems.getDefault().newWatchService());
+            }
+            catch (Throwable ex)
+            {
+                ex.printStackTrace();
+                System.exit(0);
+            }
+    
+            Path path = Paths.get(Singleton.getInstance().getWEB_ROOT());
+            try
+            {
+                @SuppressWarnings("unchecked")
+                WatchEvent.Kind<Path>[] events = new WatchEvent.Kind[]
+                {
+                    StandardWatchEventKinds.ENTRY_CREATE,
+                    StandardWatchEventKinds.ENTRY_MODIFY,
+                    StandardWatchEventKinds.ENTRY_DELETE
+                };
+                path.register(Singleton.getInstance().getWatchService(), events);
             }
             catch (Throwable ex)
             {
                 ex.printStackTrace();
             }
 
-            for (WatchEvent<?> event : key.pollEvents())
+            new Thread(new Runnable()
             {
-                WatchEvent.Kind<?> kind = event.kind();
+                @Override
+                public void run() {
+                    while (true)
+                    {
+                        WatchKey key = null;
+                        
+                        try
+                        {
+                            key = Singleton.getInstance().getWatchService().take();
+                        }
+                        catch (Throwable ex)
+                        {
+                            ex.printStackTrace();
+                        }
 
-                if (kind == StandardWatchEventKinds.OVERFLOW) continue;
-                if (kind == StandardWatchEventKinds.ENTRY_CREATE) System.out.print("ENTRY_CREATE");
-                if (kind == StandardWatchEventKinds.ENTRY_MODIFY) System.out.print("ENTRY_MODIFY");
-                if (kind == StandardWatchEventKinds.ENTRY_DELETE) System.out.print("ENTRY_DELETE");
-            }
+                        for (WatchEvent<?> event : key.pollEvents())
+                        {
+                            WatchEvent.Kind<?> kind = event.kind();
 
-            if (key.reset() == false)
-                break;
+                            if (kind == StandardWatchEventKinds.OVERFLOW) continue;
+                            if (kind == StandardWatchEventKinds.ENTRY_CREATE) System.out.print("ENTRY_CREATE");
+                            if (kind == StandardWatchEventKinds.ENTRY_MODIFY) System.out.print("ENTRY_MODIFY");
+                            if (kind == StandardWatchEventKinds.ENTRY_DELETE) System.out.print("ENTRY_DELETE");
+                        }
+
+                        if (key.reset() == false)
+                            break;
+                    }
+                }
+            }).start();
         }
-        System.exit(0);
 
         File serverDir = new File(Singleton.getInstance().getWEB_ROOT());
-        if (serverDir.exists() == false)
-            serverDir.mkdirs();
-
         Singleton.getInstance().setFileNames(serverDir.list());
  
         File[] files = serverDir.listFiles();
@@ -115,37 +111,24 @@ public class Program
             return;
         }
 
-        for (int index = 0; index <= devices.length; index++)
+        for (int index = 0; index < devices.length; index++)
+        try
         {
-            try
-            {
-                Singleton.getInstance().setServer(new ServerSocket(8080, 0, InetAddress.getByName(devices[0].getLocalIP().asFormattedString())));
-                Singleton.getInstance().setDevice(devices[index]);
-                break;
-            }
-            catch (BindException ex)
-            {
-                System.out.print(ex.getClass().getName() + " -> " + ex.getMessage() + NEWLINE);
-            }
-            catch (Throwable ex)
-            {
-                ex.printStackTrace();
-            }
+            Singleton.getInstance().setServer(new ServerSocket(8080, 0, InetAddress.getByName(devices[0].getLocalIP().asFormattedString())));
+            Singleton.getInstance().setDevice(devices[index]);
+            break;
+        }
+        catch (BindException ex)
+        {
+            System.out.print(ex.getClass().getName() + " -> " + ex.getMessage() + NEWLINE);
+        }
+        catch (Throwable ex)
+        {
+            ex.printStackTrace();
         }
 
         if (Singleton.getInstance().getServer() == null)
             System.err.print("No usable network devices are available" + NEWLINE);
-
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                System.out.print(NEWLINE + "Closing server ... ");
-                StreamUtils.closeStreams(Singleton.getInstance().getServer());
-                System.out.print("DONE" + NEWLINE);
-            }
-        }));
     }
 
     public static void main(String[] args)

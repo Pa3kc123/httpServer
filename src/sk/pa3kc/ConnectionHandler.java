@@ -4,10 +4,15 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URLConnection;
+
+import javax.activation.MimetypesFileTypeMap;
 
 import sk.pa3kc.httpconstants.HTTPHeaders;
 import sk.pa3kc.httpconstants.HTTPResponseCodes;
 import sk.pa3kc.mylibrary.util.StreamUtils;
+
+import static sk.pa3kc.mylibrary.DefaultSystemPropertyStrings.LINE_SEPARATOR;
 
 public class ConnectionHandler
 {
@@ -89,11 +94,7 @@ public class ConnectionHandler
                         if (tmp != -1)
                         extension = new String(file.getAbsolutePath().getBytes(), tmp, file.getAbsolutePath().length() - tmp);
 
-                        if (extension != null && extension.equals("txt") == true)
-                            response.setProperty(HTTPHeaders.Content_Type, "text/plain");
-                        else
-                            //?response.setProperty(HTTPHeaders.Content_Type, java.net.URLConnection.guessContentTypeFromName(Program.fileNames[index]));
-                            response.setProperty(HTTPHeaders.Content_Type, "application/octet-stream");
+                        response.setProperty(HTTPHeaders.Content_Type, getContentTypeByExtension(extension));
                     }
 
                     response.setProperty(HTTPHeaders.Content_Length, String.valueOf(file.length()));
@@ -115,5 +116,14 @@ public class ConnectionHandler
             }
         });
         thread.start();
+    }
+
+    private static String getContentTypeByExtension(String extension)
+    {
+        if (extension == null) return "application/octet-stream";
+
+        if (extension.equals(".txt") == true) return "text/plain";
+
+        return "application/octet-stream";
     }
 }

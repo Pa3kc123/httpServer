@@ -2,10 +2,12 @@ package sk.pa3kc;
 
 import java.io.File;
 import java.net.ServerSocket;
+import java.nio.file.WatchService;
 
 import sk.pa3kc.mylibrary.DefaultSystemPropertyStrings;
 import sk.pa3kc.mylibrary.myregex.MyRegex;
 import sk.pa3kc.mylibrary.net.Device;
+import sk.pa3kc.mylibrary.util.StreamUtils;
 
 public class Singleton
 {
@@ -20,6 +22,17 @@ public class Singleton
         File webRootFile = new File(this.WEB_ROOT);
         if (webRootFile.exists() == false || webRootFile.isDirectory() == false)
             webRootFile.mkdirs();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                System.out.print(NEWLINE + "Closing streams ...");
+                StreamUtils.closeStreams(watchService, server);        
+                System.out.print("DONE" + NEWLINE);
+            }
+        }));
     }
     public static final Singleton getInstance() { return instance; }
     //endregion
@@ -29,6 +42,7 @@ public class Singleton
  
     private Device device;
     private ServerSocket server;
+    private WatchService watchService;
 
     private String[] fileNames;
     private String[] filePaths;
@@ -44,6 +58,7 @@ public class Singleton
     public int getFileCount() { return this.fileCount; }
     public String[] getFileNames() { return this.fileNames; }
     public String[] getFilePaths() { return this.filePaths; }
+    public WatchService getWatchService() { return this.watchService; }
     //endregion
     //region Setters
     public void setDevice(Device value) { this.device = value; }
@@ -51,5 +66,6 @@ public class Singleton
     public void setFileCount(int value) { this.fileCount = value; }
     public void setFileNames(String[] value) { this.fileNames = value; }
     public void setFilePaths(String[] value) { this.filePaths = value; }
+    public void setWatchService(WatchService value) { this.watchService = value; }
     //endregion
 }
