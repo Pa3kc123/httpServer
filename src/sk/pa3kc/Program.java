@@ -1,8 +1,6 @@
 package sk.pa3kc;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.InetAddress;
@@ -12,12 +10,10 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.channels.IllegalBlockingModeException;
 import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
 
 import sk.pa3kc.mylibrary.net.Device;
 
@@ -38,7 +34,7 @@ public class Program
                 System.exit(0);
             }
     
-            Path path = Paths.get(Singleton.getInstance().getWEB_ROOT());
+            Path path = Paths.get(Singleton.getInstance().WEB_ROOT);
             try
             {
                 @SuppressWarnings("unchecked")
@@ -61,35 +57,20 @@ public class Program
                 public void run() {
                     while (true)
                     {
-                        WatchKey key = null;
-                        
                         try
                         {
-                            key = Singleton.getInstance().getWatchService().take();
+                            Singleton.getInstance().getWatchService().take();
                         }
                         catch (Throwable ex)
                         {
                             ex.printStackTrace();
                         }
-
-                        for (WatchEvent<?> event : key.pollEvents())
-                        {
-                            WatchEvent.Kind<?> kind = event.kind();
-
-                            if (kind == StandardWatchEventKinds.OVERFLOW) continue;
-                            if (kind == StandardWatchEventKinds.ENTRY_CREATE) System.out.print("ENTRY_CREATE");
-                            if (kind == StandardWatchEventKinds.ENTRY_MODIFY) System.out.print("ENTRY_MODIFY");
-                            if (kind == StandardWatchEventKinds.ENTRY_DELETE) System.out.print("ENTRY_DELETE");
-                        }
-
-                        if (key.reset() == false)
-                            break;
                     }
                 }
             }).start();
         }
 
-        File serverDir = new File(Singleton.getInstance().getWEB_ROOT());
+        File serverDir = new File(Singleton.getInstance().WEB_ROOT);
         Singleton.getInstance().setFileNames(serverDir.list());
  
         File[] files = serverDir.listFiles();
@@ -100,8 +81,8 @@ public class Program
 
         Singleton.getInstance().setFileCount(Singleton.getInstance().getFileNames().length);
 
-        System.out.print("CWD = " + Singleton.getInstance().getCWD() + NEWLINE);
-        System.out.print("WEB_ROOT = " + Singleton.getInstance().getWEB_ROOT() + NEWLINE);
+        System.out.print("CWD = " + Singleton.getInstance().CWD + NEWLINE);
+        System.out.print("WEB_ROOT = " + Singleton.getInstance().WEB_ROOT + NEWLINE);
 
         Device[] devices = Device.getUsableDevices();
 

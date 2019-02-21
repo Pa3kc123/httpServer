@@ -4,15 +4,10 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URLConnection;
-
-import javax.activation.MimetypesFileTypeMap;
 
 import sk.pa3kc.httpconstants.HTTPHeaders;
 import sk.pa3kc.httpconstants.HTTPResponseCodes;
 import sk.pa3kc.mylibrary.util.StreamUtils;
-
-import static sk.pa3kc.mylibrary.DefaultSystemPropertyStrings.LINE_SEPARATOR;
 
 public class ConnectionHandler
 {
@@ -61,7 +56,7 @@ public class ConnectionHandler
                     for (int i = 0; i < Singleton.getInstance().getFileCount(); i++)
                         builder.append("<p><a id=\"" + i + "\" href=\"" + Singleton.getInstance().getFileNames()[i] + "\" download>" + Singleton.getInstance().getFileNames()[i] + "</a></p>");
 
-                    response.setBody("<html><body>" + builder.toString() + "</body></html>");
+                    response.setBody("<html><body><div id=\"content\">" + builder.toString() + "</div></body></html>");
                     response.writeToOutput();
 
                     StreamUtils.closeStreams(os, is, client);

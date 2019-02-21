@@ -4,6 +4,9 @@ import java.io.File;
 import java.net.ServerSocket;
 import java.nio.file.WatchService;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
 import sk.pa3kc.mylibrary.DefaultSystemPropertyStrings;
 import sk.pa3kc.mylibrary.myregex.MyRegex;
 import sk.pa3kc.mylibrary.net.Device;
@@ -23,12 +26,14 @@ public class Singleton
         if (webRootFile.exists() == false || webRootFile.isDirectory() == false)
             webRootFile.mkdirs();
 
+        this.scriptEngine = new ScriptEngineManager().getEngineByExtension("JavaScript");
+
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
         {
             @Override
             public void run()
             {
-                System.out.print(NEWLINE + "Closing streams ...");
+                System.out.print(NEWLINE + "Closing streams ... ");
                 StreamUtils.closeStreams(watchService, server);        
                 System.out.print("DONE" + NEWLINE);
             }
@@ -37,8 +42,8 @@ public class Singleton
     public static final Singleton getInstance() { return instance; }
     //endregion
     //region properties
-    private final String CWD;
-    private final String WEB_ROOT;
+    public final String CWD;
+    public final String WEB_ROOT;
  
     private Device device;
     private ServerSocket server;
@@ -49,12 +54,11 @@ public class Singleton
     private int fileCount;
     
     public static final String NEWLINE = DefaultSystemPropertyStrings.LINE_SEPARATOR;
+    public final ScriptEngine scriptEngine;
     //endregion
     //region Getters
     public Device getDevice() { return this.device; }
     public ServerSocket getServer() { return this.server; }
-    public String getCWD() { return this.CWD; }
-    public String getWEB_ROOT() { return this.WEB_ROOT; }
     public int getFileCount() { return this.fileCount; }
     public String[] getFileNames() { return this.fileNames; }
     public String[] getFilePaths() { return this.filePaths; }
