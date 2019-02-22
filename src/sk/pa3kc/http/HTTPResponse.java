@@ -1,4 +1,4 @@
-package sk.pa3kc;
+package sk.pa3kc.http;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import sk.pa3kc.httpconstants.HTTPResponseCodes;
+import sk.pa3kc.http.constants.HTTPResponseCodes;
 import sk.pa3kc.mylibrary.util.StreamUtils;
 
 public class HTTPResponse

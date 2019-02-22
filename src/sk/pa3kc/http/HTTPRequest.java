@@ -1,4 +1,4 @@
-package sk.pa3kc;
+package sk.pa3kc.http;
 
 import java.io.FileWriter;
 import java.io.InputStream;

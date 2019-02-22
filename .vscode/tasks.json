@@ -35,7 +35,8 @@
                     "-classpath", "bin\\production",
                     "-bootclasspath", "${env:JAVA_HOME}\\jre\\lib\\rt.jar",
                     "src\\sk\\pa3kc\\*.java",
-                    "src\\sk\\pa3kc\\httpconstants\\*.java"
+                    "src\\sk\\pa3kc\\http\\*.java",
+                    "src\\sk\\pa3kc\\http\\constants\\*.java"
                 ]
             },
             "linux": {
@@ -45,7 +46,8 @@
                     "-sourcepath", "src",
                     "-bootclasspath", "${env:JAVA_HOME}/jre/lib/rt.jar",
                     "src/sk/pa3kc/*.java",
-                    "src/sk/pa3kc/httpconstants/*.java"
+                    "src/sk/pa3kc/http/*.java",
+                    "src/sk/pa3kc/http/constants/*.java"
                 ]
             },
             "args": [

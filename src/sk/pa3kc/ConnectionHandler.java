@@ -5,8 +5,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import sk.pa3kc.httpconstants.HTTPHeaders;
-import sk.pa3kc.httpconstants.HTTPResponseCodes;
+import sk.pa3kc.http.HTTPRequest;
+import sk.pa3kc.http.HTTPResponse;
+import sk.pa3kc.http.constants.HTTPHeaders;
+import sk.pa3kc.http.constants.HTTPResponseCodes;
 import sk.pa3kc.mylibrary.util.StreamUtils;
 
 public class ConnectionHandler
@@ -51,12 +53,7 @@ public class ConnectionHandler
                     response.setProperty(HTTPHeaders.Content_Type, "text/html");
                     response.setResponseCode(HTTPResponseCodes.OK_200);
 
-                    StringBuilder builder = new StringBuilder();
-
-                    for (int i = 0; i < Singleton.getInstance().getFileCount(); i++)
-                        builder.append("<p><a id=\"" + i + "\" href=\"" + Singleton.getInstance().getFileNames()[i] + "\" download>" + Singleton.getInstance().getFileNames()[i] + "</a></p>");
-
-                    response.setBody("<html><body><div id=\"content\">" + builder.toString() + "</div></body></html>");
+                    response.setBody("<html><body><div id=\"content\">" + generateLinkList() + "</div></body></html>");
                     response.writeToOutput();
 
                     StreamUtils.closeStreams(os, is, client);
@@ -120,5 +117,23 @@ public class ConnectionHandler
         if (extension.equals(".txt") == true) return "text/plain";
 
         return "application/octet-stream";
+    }
+
+    private static String generateLinkList()
+    {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("<ul style=\"list-style: none;padding-left: 0;\">");
+        for (int i = 0; i < Singleton.getInstance().getFileCount(); i++)
+        {
+            builder.append("<li><a href=\"<p><a href=\"");
+            builder.append(Singleton.getInstance().getFileNames()[i]);
+            builder.append("\" download>");
+            builder.append(Singleton.getInstance().getFileNames()[i]);
+            builder.append("</a></li>");
+        }
+        builder.append("<ul>");
+
+        return builder.toString();
     }
 }

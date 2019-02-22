@@ -1,4 +1,4 @@
-package sk.pa3kc.httpconstants;
+package sk.pa3kc.http.constants;
 
 public final class HTTPMethods
 {

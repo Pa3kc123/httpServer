@@ -59,6 +59,17 @@ public class Program
                     {
                         try
                         {
+                            File serverDir = new File(Singleton.getInstance().WEB_ROOT);
+                            Singleton.getInstance().setFileNames(serverDir.list());
+
+                            File[] files = serverDir.listFiles();
+                            Singleton.getInstance().setFilePaths(new String[files.length]);
+
+                            for (int i = 0; i < files.length; i++)
+                                Singleton.getInstance().getFilePaths()[i] = files[i].getAbsolutePath();
+
+                            Singleton.getInstance().setFileCount(Singleton.getInstance().getFileNames().length);
+
                             Singleton.getInstance().getWatchService().take();
                         }
                         catch (Throwable ex)
@@ -69,17 +80,6 @@ public class Program
                 }
             }).start();
         }
-
-        File serverDir = new File(Singleton.getInstance().WEB_ROOT);
-        Singleton.getInstance().setFileNames(serverDir.list());
- 
-        File[] files = serverDir.listFiles();
-        Singleton.getInstance().setFilePaths(new String[files.length]);
- 
-        for (int i = 0; i < files.length; i++)
-            Singleton.getInstance().getFilePaths()[i] = files[i].getAbsolutePath();
-
-        Singleton.getInstance().setFileCount(Singleton.getInstance().getFileNames().length);
 
         System.out.print("CWD = " + Singleton.getInstance().CWD + NEWLINE);
         System.out.print("WEB_ROOT = " + Singleton.getInstance().WEB_ROOT + NEWLINE);
