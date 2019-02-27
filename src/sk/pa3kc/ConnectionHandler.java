@@ -38,8 +38,7 @@ public class ConnectionHandler
                 {
                     if (is == null || os == null)
                     {
-                        if (is != null) StreamUtils.closeStreams(is);
-                        if (os != null) StreamUtils.closeStreams(os);
+                        StreamUtils.closeStreams(is, os);
                         return;
                     }
                 }
@@ -57,7 +56,7 @@ public class ConnectionHandler
                     response.writeToOutput();
 
                     StreamUtils.closeStreams(os, is, client);
-                    return;    
+                    return;
                 }
                 
                 String tmpPath = request.getPath().replaceFirst("/", "");

@@ -1,8 +1,14 @@
 package sk.pa3kc;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.nio.file.WatchService;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -28,6 +34,48 @@ public class Singleton
 
         this.scriptEngine = new ScriptEngineManager().getEngineByExtension("JavaScript");
 
+        InputStream stream = null;
+        InputStreamReader streamReader = null;
+        BufferedReader reader = null;
+        try
+        {
+            stream = this.getClass().getResourceAsStream("assets/exts.mime");
+            streamReader = new InputStreamReader(stream);
+            reader = new BufferedReader(streamReader);
+
+            List<String> extensions = new ArrayList<String>();
+            List<String> contentTypes = new ArrayList<String>();
+            int lineNumber = 1;
+            for (String line = reader.readLine(); line != null; line = reader.readLine())
+            {
+                if (line.startsWith("#") == true) continue;
+                
+                String[] values = line.split("=");
+                if (values.length != 2)
+                {
+                    System.err.print("ERROR while loading mime types -> Invalid format (line " + lineNumber + ")" + NEWLINE);
+                    System.err.flush();
+                    System.exit(0);
+                }
+
+                extensions.add(values[0]);
+                contentTypes.add(values[1]);
+
+                lineNumber++;
+            }
+
+            this.extensions = extensions.toArray(new String[0]);
+            this.contentTypes = contentTypes.toArray(new String[0]);
+        }
+        catch (Throwable ex)
+        {
+            ex.printStackTrace();
+        }
+        finally
+        {
+            StreamUtils.closeStreams(reader, streamReader, stream);
+        }
+
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable()
         {
             @Override
@@ -52,6 +100,8 @@ public class Singleton
     private String[] fileNames;
     private String[] filePaths;
     private int fileCount;
+    private String[] extensions;
+    private String[] contentTypes;
     
     public static final String NEWLINE = DefaultSystemPropertyStrings.LINE_SEPARATOR;
     public final ScriptEngine scriptEngine;

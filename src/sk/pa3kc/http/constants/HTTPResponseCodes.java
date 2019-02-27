@@ -16,10 +16,12 @@ public final class HTTPResponseCodes
     public static final String Found_302 = "302 Found";
     public static final String See_Other_303 = "303 See Other";
     public static final String Not_Modified_304 = "304 Not Modified";
+    public static final String Use_Proxy_305 = "305 Use Proxy";
     public static final String Temporary_Redirect_307 = "307 Temporary Redirect";
     public static final String Permanent_Redirect_308 = "308 Permanent Redirect";
     public static final String Bad_Request_400 = "400 Bad Request";
     public static final String Unauthorized_401 = "401 Unauthorized";
+    public static final String Payment_Required_402 = "402 Payment Required";
     public static final String Forbidden_403 = "403 Forbidden";
     public static final String Not_Found_404 = "404 Not Found";
     public static final String Method_Not_Allowed_405 = "405 Method Not Allowed";
