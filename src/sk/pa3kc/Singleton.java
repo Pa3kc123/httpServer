@@ -24,6 +24,8 @@ public class Singleton
     private static final Singleton instance = new Singleton();
     private Singleton()
     {
+        this.classLoader = this.getClass().getClassLoader();
+
         String path = Program.class.getProtectionDomain().getCodeSource().getLocation().getFile().replaceFirst("\\/", "");
         this.CWD = path.endsWith(".jar") == true ? MyRegex.Matches(path, "(.*)\\/.*.jar")[0] : path;
         this.WEB_ROOT = this.CWD + "/web";
@@ -39,7 +41,7 @@ public class Singleton
         BufferedReader reader = null;
         try
         {
-            stream = this.getClass().getResourceAsStream("assets/exts.mime");
+            stream = this.classLoader.getResourceAsStream("assets/exts.mime");
             streamReader = new InputStreamReader(stream);
             reader = new BufferedReader(streamReader);
 
@@ -48,9 +50,10 @@ public class Singleton
             int lineNumber = 1;
             for (String line = reader.readLine(); line != null; line = reader.readLine())
             {
-                if (line.startsWith("#") == true) continue;
+                System.out.println(line);
+                if (line.startsWith("#") == true || line.equals("") == true) continue;
                 
-                String[] values = line.split("=");
+                String[] values = line.split("=", 2);
                 if (values.length != 2)
                 {
                     System.err.print("ERROR while loading mime types -> Invalid format (line " + lineNumber + ")" + NEWLINE);
@@ -92,6 +95,7 @@ public class Singleton
     //region properties
     public final String CWD;
     public final String WEB_ROOT;
+    public final ClassLoader classLoader;
  
     private Device device;
     private ServerSocket server;
