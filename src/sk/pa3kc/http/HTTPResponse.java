@@ -101,7 +101,7 @@ public class HTTPResponse
         }
         catch (Throwable ex)
         {
-            ex.printStackTrace();
+            ex.printStackTrace(System.out);
         }
         finally
         {

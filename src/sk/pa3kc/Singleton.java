@@ -2,7 +2,6 @@ package sk.pa3kc;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
@@ -12,6 +11,10 @@ import java.util.List;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 
 import sk.pa3kc.mylibrary.DefaultSystemPropertyStrings;
 import sk.pa3kc.mylibrary.myregex.MyRegex;
@@ -50,7 +53,6 @@ public class Singleton
             int lineNumber = 1;
             for (String line = reader.readLine(); line != null; line = reader.readLine())
             {
-                System.out.println(line);
                 if (line.startsWith("#") == true || line.equals("") == true) continue;
                 
                 String[] values = line.split("=", 2);
@@ -72,7 +74,7 @@ public class Singleton
         }
         catch (Throwable ex)
         {
-            ex.printStackTrace();
+            ex.printStackTrace(System.out);
         }
         finally
         {
@@ -89,7 +91,26 @@ public class Singleton
                 System.out.print("DONE" + NEWLINE);
             }
         }));
+
+        this.clientCounterLabel = new JLabel("0");
+        this.isClientCounterLabel = new JLabel("0");
+        this.osClientCounterLabel = new JLabel("0");
+        JPanel panel = new JPanel();
+        panel.add(this.clientCounterLabel);
+        panel.add(this.isClientCounterLabel);
+        panel.add(this.osClientCounterLabel);
+        JFrame frame = new JFrame();
+        frame.add(panel);
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        frame.pack();
+        frame.setVisible(true);        
     }
+    public final JLabel clientCounterLabel;
+    public final JLabel isClientCounterLabel;
+    public final JLabel osClientCounterLabel;
+    public int clientCounter = 0;
+    public int isClientCounter = 0;
+    public int osClientCounter = 0;
     public static final Singleton getInstance() { return instance; }
     //endregion
     //region properties

@@ -1,13 +1,10 @@
 package sk.pa3kc.http;
 
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import sk.pa3kc.mylibrary.util.StreamUtils;
-
-import static sk.pa3kc.Singleton.NEWLINE;
+import sk.pa3kc.Singleton;
 
 public class HTTPRequest
 {
@@ -23,6 +20,7 @@ public class HTTPRequest
 
     public HTTPRequest(InputStream is)
     {
+        Singleton.getInstance().isClientCounterLabel.setText(String.valueOf(++Singleton.getInstance().isClientCounter));
         try
         {
             int lastC = -1;
@@ -45,7 +43,7 @@ public class HTTPRequest
         }
         catch (Throwable ex)
         {
-            ex.printStackTrace();
+            ex.printStackTrace(System.out);
         }
 
         if (this.buffer != null && this.buffer.length != 0)
@@ -62,43 +60,26 @@ public class HTTPRequest
             this.protocol = null;
         }
 
-        {
-            List<String> propertyNames = new ArrayList<String>();
-            List<String> propertyValues = new ArrayList<String>();
+        List<String> propertyNames = new ArrayList<String>();
+        List<String> propertyValues = new ArrayList<String>();
 
-            for (int i = 1; i < this.buffer.length; i++)
+        for (int i = 1; i < this.buffer.length; i++)
+        {
+            if (this.buffer[i] == null) continue;
+
+            String[] args = this.buffer[i].split(": ", 2);
+            if (args.length == 2)
             {
-                if (this.buffer[i] == null) continue;
-    
-                String[] args = this.buffer[i].split(": ", 2);
-                if (args.length == 2)
-                {
-                    propertyNames.add(args[0]);
-                    propertyValues.add(args[1]);
-                }
+                propertyNames.add(args[0]);
+                propertyValues.add(args[1]);
             }
-
-            this.propertyNames = propertyNames.toArray(new String[0]);
-            this.propertyValues = propertyValues.toArray(new String[0]);
-            this.propertyCount = this.propertyNames.length;
         }
 
-        FileWriter writer = null;
-        try
-        {
-            writer = new FileWriter(new java.io.File("output.log"), true);
-            for (String line : this.buffer)
-                writer.append(line);
-            writer.append("-------------------------" + NEWLINE);
-        }
-        catch (Throwable ex)
-        {
-            ex.printStackTrace();
-        }
-        finally
-        {
-            StreamUtils.closeStreams(writer);
-        }
+        this.propertyNames = propertyNames.toArray(new String[0]);
+        this.propertyValues = propertyValues.toArray(new String[0]);
+        this.propertyCount = this.propertyNames.length;
+
+        Singleton.getInstance().isClientCounterLabel.setText(String.valueOf(--Singleton.getInstance().isClientCounter));
     }
 
     public String getMethod() { return this.method; }

@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.channels.IllegalBlockingModeException;
+import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,7 +32,7 @@ public class Program
             }
             catch (Throwable ex)
             {
-                ex.printStackTrace();
+                ex.printStackTrace(System.out);
                 System.exit(0);
             }
     
@@ -48,7 +50,7 @@ public class Program
             }
             catch (Throwable ex)
             {
-                ex.printStackTrace();
+                ex.printStackTrace(System.out);
             }
 
             new Thread(new Runnable()
@@ -72,9 +74,14 @@ public class Program
 
                             Singleton.getInstance().getWatchService().take();
                         }
+                        catch (ClosedWatchServiceException ex)
+                        {
+                            System.err.print(ex.getClass().getName() + " -> " + ex.getMessage() + NEWLINE);
+                            return;
+                        }
                         catch (Throwable ex)
                         {
-                            ex.printStackTrace();
+                            ex.printStackTrace(System.out);
                         }
                     }
                 }
@@ -95,7 +102,7 @@ public class Program
         for (int index = 0; index < devices.length; index++)
         try
         {
-            Singleton.getInstance().setServer(new ServerSocket(8080, 0, InetAddress.getByName(devices[0].getLocalIP().asFormattedString())));
+            Singleton.getInstance().setServer(new ServerSocket(8080));
             Singleton.getInstance().setDevice(devices[index]);
             break;
         }
@@ -105,11 +112,14 @@ public class Program
         }
         catch (Throwable ex)
         {
-            ex.printStackTrace();
+            ex.printStackTrace(System.out);
         }
 
         if (Singleton.getInstance().getServer() == null)
+        {
             System.err.print("No usable network devices are available" + NEWLINE);
+            System.exit(0xFFFFFFFF);
+        }
     }
 
     public static void main(String[] args)
@@ -140,15 +150,15 @@ public class Program
             }
             catch (IOException ex)
             {
-                ex.printStackTrace();
+                ex.printStackTrace(System.out);
             }
             catch (IllegalBlockingModeException ex)
             {
-                ex.printStackTrace();
+                ex.printStackTrace(System.out);
             }
             catch (Throwable ex)
             {
-                ex.printStackTrace();
+                ex.printStackTrace(System.out);
             }
         }
     }
