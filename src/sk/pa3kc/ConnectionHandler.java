@@ -40,6 +40,7 @@ public class ConnectionHandler
                     if (is == null || os == null)
                     {
                         StreamUtils.closeStreams(is, os);
+                        Singleton.getInstance().clientCounterLabel.setText(String.valueOf(--Singleton.getInstance().clientCounter));
                         return;
                     }
                 }
@@ -59,6 +60,7 @@ public class ConnectionHandler
                     response.writeToOutput();
 
                     Singleton.getInstance().osClientCounterLabel.setText(String.valueOf(--Singleton.getInstance().osClientCounter));
+                    Singleton.getInstance().clientCounterLabel.setText(String.valueOf(--Singleton.getInstance().clientCounter));
                     StreamUtils.closeStreams(os, is, client);
                     return;
                 }
