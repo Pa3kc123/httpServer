@@ -32,8 +32,12 @@
             "windows": {
                 "args": [
                     "-d", "bin\\production",
+                    "-h", "bin\\production\\headers",
                     "-classpath", "bin\\production",
                     "-bootclasspath", "${env:JAVA_HOME}\\jre\\lib\\rt.jar",
+                    "-sourcepath", "src",
+                    "-source", "1.6",
+                    "-target", "1.6",
                     "src\\sk\\pa3kc\\*.java",
                     "src\\sk\\pa3kc\\http\\*.java",
                     "src\\sk\\pa3kc\\http\\constants\\*.java"
@@ -42,19 +46,17 @@
             "linux": {
                 "args": [
                     "-d", "bin/production",
+                    "-h", "bin/production/headers",
                     "-classpath", "bin/production",
-                    "-sourcepath", "src",
                     "-bootclasspath", "${env:JAVA_HOME}/jre/lib/rt.jar",
+                    "-sourcepath", "src",
+                    "-source", "1.6",
+                    "-target", "1.6",
                     "src/sk/pa3kc/*.java",
                     "src/sk/pa3kc/http/*.java",
                     "src/sk/pa3kc/http/constants/*.java"
                 ]
             },
-            "args": [
-                "-sourcepath", "src",
-                "-source", "1.6",
-                "-target", "1.6"
-            ],
             "dependsOn": [
                 "extract jars"
             ],

@@ -22,7 +22,6 @@ public class ConnectionHandler
             @Override
             public void run()
             {
-                Singleton.getInstance().clientCounterLabel.setText(String.valueOf(++Singleton.getInstance().clientCounter));
                 InputStream is = null;
                 OutputStream os = null;
 
@@ -40,7 +39,6 @@ public class ConnectionHandler
                     if (is == null || os == null)
                     {
                         StreamUtils.closeStreams(is, os);
-                        Singleton.getInstance().clientCounterLabel.setText(String.valueOf(--Singleton.getInstance().clientCounter));
                         return;
                     }
                 }
@@ -48,7 +46,6 @@ public class ConnectionHandler
                 HTTPRequest request = new HTTPRequest(is);
                 if (request.getPath() == null || request.getPath().equals("/") == true)
                 {
-                    Singleton.getInstance().osClientCounterLabel.setText(String.valueOf(++Singleton.getInstance().osClientCounter));
                     HTTPResponse response = new HTTPResponse(os);
 
                     response.setProtocol(request.getProtocol());
@@ -59,8 +56,6 @@ public class ConnectionHandler
                     response.setBody("<html><body><div id=\"content\">" + generateLinkList() + "</div></body></html>");
                     response.writeToOutput();
 
-                    Singleton.getInstance().osClientCounterLabel.setText(String.valueOf(--Singleton.getInstance().osClientCounter));
-                    Singleton.getInstance().clientCounterLabel.setText(String.valueOf(--Singleton.getInstance().clientCounter));
                     StreamUtils.closeStreams(os, is, client);
                     return;
                 }
@@ -77,7 +72,6 @@ public class ConnectionHandler
 
                 if (valid == true)
                 {
-                    Singleton.getInstance().osClientCounterLabel.setText(String.valueOf(++Singleton.getInstance().osClientCounter));
                     HTTPResponse response = new HTTPResponse(os);
                     response.setProtocol(request.getProtocol());
                     response.setResponseCode(HTTPResponseCodes.OK_200);
@@ -99,22 +93,18 @@ public class ConnectionHandler
 
                     response.writeHeaderToOutput();
                     response.writeBinaryFileToOutput(file);
-                    Singleton.getInstance().osClientCounterLabel.setText(String.valueOf(--Singleton.getInstance().osClientCounter));
                 }
                 else
                 {
-                    Singleton.getInstance().osClientCounterLabel.setText(String.valueOf(++Singleton.getInstance().osClientCounter));
                     HTTPResponse response = new HTTPResponse(os);
 
                     response.setProtocol(request.getProtocol());
                     response.setProperty(HTTPHeaders.Content_Type, "text/html");
                     response.setBody("<html><body><p>ERROR</p></body></html>");
                     response.writeToOutput();
-                    Singleton.getInstance().osClientCounterLabel.setText(String.valueOf(--Singleton.getInstance().osClientCounter));
                 }
 
                 StreamUtils.closeStreams(os, is, client);
-                Singleton.getInstance().clientCounterLabel.setText(String.valueOf(--Singleton.getInstance().clientCounter));
             }
         }).start();
     }

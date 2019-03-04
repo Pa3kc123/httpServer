@@ -220,6 +220,9 @@ public class Singleton
     public static final String NEWLINE = DefaultSystemPropertyStrings.LINE_SEPARATOR;
     public final ScriptEngine scriptEngine;
     //endregion
+    //region Natives
+    public native void init();
+    //endregion
     //region Getters
     public Device getDevice() { return this.device; }
     public ServerSocket getServer() { return this.server; }

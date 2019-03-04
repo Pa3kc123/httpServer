@@ -4,8 +4,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import sk.pa3kc.Singleton;
-
 public class HTTPRequest
 {
     private String[] propertyNames;
@@ -20,7 +18,6 @@ public class HTTPRequest
 
     public HTTPRequest(InputStream is)
     {
-        Singleton.getInstance().isClientCounterLabel.setText(String.valueOf(++Singleton.getInstance().isClientCounter));
         try
         {
             int lastC = -1;
@@ -79,7 +76,6 @@ public class HTTPRequest
         this.propertyValues = propertyValues.toArray(new String[0]);
         this.propertyCount = this.propertyNames.length;
 
-        Singleton.getInstance().isClientCounterLabel.setText(String.valueOf(--Singleton.getInstance().isClientCounter));
     }
 
     public String getMethod() { return this.method; }
