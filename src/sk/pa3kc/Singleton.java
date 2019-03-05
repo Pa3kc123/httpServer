@@ -31,6 +31,16 @@ public class Singleton
     private static final Singleton instance = new Singleton();
     private Singleton()
     {
+        //* Colors for win10 cmd
+        try
+        {
+            System.load("");
+        }
+        catch (Throwable ex)
+        {
+            ex.printStackTrace();
+        }
+
         //* Class loader
         this.classLoader = this.getClass().getClassLoader();
 
@@ -221,7 +231,7 @@ public class Singleton
     public final ScriptEngine scriptEngine;
     //endregion
     //region Natives
-    public native void init();
+    private native void init();
     //endregion
     //region Getters
     public Device getDevice() { return this.device; }
