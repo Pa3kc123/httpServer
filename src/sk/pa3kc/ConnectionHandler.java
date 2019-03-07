@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import javax.swing.text.html.HTML;
+
 import sk.pa3kc.http.HTTPRequest;
 import sk.pa3kc.http.HTTPResponse;
 import sk.pa3kc.http.constants.HTTPHeaders;
@@ -49,11 +51,10 @@ public class ConnectionHandler
                     HTTPResponse response = new HTTPResponse(os);
 
                     response.setProtocol(request.getProtocol());
-                    response.setProperty(HTTPHeaders.Content_Type, "text/html");
-                    response.setProperty(HTTPHeaders.Keep_Alive, "false");
                     response.setResponseCode(HTTPResponseCodes.OK_200);
-
-                    response.setBody("<html><body><div id=\"content\">" + generateLinkList() + "</div></body></html>");
+                    response.setProperty(HTTPHeaders.Content_Type, "text/html");
+                    response.setBody("<!DOCTYPE html><html><body><div id=\"content\">" + generateLinkList() + "</div></body></html>");
+                    Logger.log(response.getBody());
                     response.writeToOutput();
 
                     StreamUtils.closeStreams(os, is, client);
@@ -78,17 +79,10 @@ public class ConnectionHandler
                     response.setProperty(HTTPHeaders.Content_Disposition, "attachment; filename\"" + Singleton.getInstance().getFileNames()[index] + "\"");
                     response.setProperty(HTTPHeaders.Transfer_Encoding, "chunked");
 
-                    File file = new File(Singleton.getInstance().getFilePaths()[index]);
-                    {
-                        String extension = null;
-                        int tmp = file.getAbsolutePath().lastIndexOf('.');
-                        
-                        if (tmp != -1)
-                        extension = new String(file.getAbsolutePath().getBytes(), tmp, file.getAbsolutePath().length() - tmp);
-
-                        response.setProperty(HTTPHeaders.Content_Type, getContentTypeByExtension(extension));
-                    }
-
+                    String tmp = Singleton.getInstance().getFilePaths()[index];
+                    File file = new File(tmp);
+                    int dotIndex = tmp.lastIndexOf('.') + 1;
+                    response.setProperty(HTTPHeaders.Content_Type, dotIndex != -1 ? getContentTypeByExtension(tmp.substring(dotIndex, tmp.length() - dotIndex)) : "application/octet-stream");
                     response.setProperty(HTTPHeaders.Content_Length, String.valueOf(file.length()));
 
                     response.writeHeaderToOutput();
@@ -113,7 +107,9 @@ public class ConnectionHandler
     {
         if (extension == null) return "application/octet-stream";
 
-        if (extension.equals(".txt") == true) return "text/plain";
+        for (int i = 0; i < Singleton.getInstance().extensions.length; i++)
+        if (extension.equals(Singleton.getInstance().extensions[i]) == true)
+            return Singleton.getInstance().contentTypes[i];
 
         return "application/octet-stream";
     }
@@ -125,13 +121,13 @@ public class ConnectionHandler
         builder.append("<ul style=\"list-style: none;padding-left: 0;\">");
         for (int i = 0; i < Singleton.getInstance().getFileCount(); i++)
         {
-            builder.append("<li><a href=\"<p><a href=\"");
+            builder.append("<li><a href=\"");
             builder.append(Singleton.getInstance().getFileNames()[i]);
             builder.append("\" download>");
             builder.append(Singleton.getInstance().getFileNames()[i]);
             builder.append("</a></li>");
         }
-        builder.append("<ul>");
+        builder.append("</ul>");
 
         return builder.toString();
     }

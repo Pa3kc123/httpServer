@@ -29,18 +29,9 @@ public class Singleton
 {
     //region Singleton
     private static final Singleton instance = new Singleton();
+    public static final Singleton getInstance() { return instance; }
     private Singleton()
     {
-        //* Colors for win10 cmd
-        try
-        {
-            System.load("");
-        }
-        catch (Throwable ex)
-        {
-            ex.printStackTrace();
-        }
-
         //* Class loader
         this.classLoader = this.getClass().getClassLoader();
 
@@ -61,14 +52,15 @@ public class Singleton
         InputStream stream = null;
         InputStreamReader streamReader = null;
         BufferedReader reader = null;
+        List<String> extensions = new ArrayList<String>();
+        List<String> contentTypes = new ArrayList<String>();
+ 
         try
         {
             stream = this.classLoader.getResourceAsStream("assets/exts.mime");
             streamReader = new InputStreamReader(stream);
             reader = new BufferedReader(streamReader);
 
-            List<String> extensions = new ArrayList<String>();
-            List<String> contentTypes = new ArrayList<String>();
             int lineNumber = 1;
             for (String line = reader.readLine(); line != null; line = reader.readLine())
             {
@@ -88,8 +80,6 @@ public class Singleton
                 lineNumber++;
             }
 
-            this.extensions = extensions.toArray(new String[0]);
-            this.contentTypes = contentTypes.toArray(new String[0]);
         }
         catch (Throwable ex)
         {
@@ -99,11 +89,13 @@ public class Singleton
         {
             StreamUtils.closeStreams(reader, streamReader, stream);
         }
+        this.extensions = extensions.toArray(new String[0]);
+        this.contentTypes = contentTypes.toArray(new String[0]);
 
         //* Web directory watch service
         try
         {
-            Singleton.getInstance().setWatchService(FileSystems.getDefault().newWatchService());
+            this.watchService = FileSystems.getDefault().newWatchService();
         }
         catch (Throwable ex)
         {
@@ -111,7 +103,7 @@ public class Singleton
             System.exit(0);
         }
 
-        Path webDirPath = Paths.get(Singleton.getInstance().WEB_ROOT);
+        Path webDirPath = Paths.get(this.WEB_ROOT);
         try
         {
             @SuppressWarnings("unchecked")
@@ -121,7 +113,7 @@ public class Singleton
                 StandardWatchEventKinds.ENTRY_MODIFY,
                 StandardWatchEventKinds.ENTRY_DELETE
             };
-            webDirPath.register(Singleton.getInstance().getWatchService(), events);
+            webDirPath.register(this.watchService, events);
         }
         catch (Throwable ex)
         {
@@ -132,21 +124,28 @@ public class Singleton
         {
             @Override
             public void run() {
+                File serverDir = new File(Singleton.getInstance().WEB_ROOT);
+
                 while (true)
                 {
+                    Singleton.getInstance().setFileNames(serverDir.list());
+                    Singleton.getInstance().setFileCount(Singleton.getInstance().getFileNames().length);
+                    Singleton.getInstance().setFilePaths(new String[Singleton.getInstance().getFileCount()]);
+                    {
+                        StringBuilder builder = new StringBuilder();
+                        for (int i = 0; i < Singleton.getInstance().getFileCount(); i++)
+                        {
+                            builder.append(serverDir.getAbsolutePath());
+                            builder.append(DefaultSystemPropertyStrings.FILE_SEPARATOR);
+                            builder.append(Singleton.getInstance().getFileNames()[i]);
+                            Singleton.getInstance().getFilePaths()[i] = builder.toString();
+                            builder.delete(0, builder.length());
+                        }
+                        builder = null;
+                    }
+
                     try
                     {
-                        File serverDir = new File(Singleton.getInstance().WEB_ROOT);
-                        Singleton.getInstance().setFileNames(serverDir.list());
-
-                        File[] files = serverDir.listFiles();
-                        Singleton.getInstance().setFilePaths(new String[files.length]);
-
-                        for (int i = 0; i < files.length; i++)
-                            Singleton.getInstance().getFilePaths()[i] = files[i].getAbsolutePath();
-
-                        Singleton.getInstance().setFileCount(Singleton.getInstance().getFileNames().length);
-
                         Singleton.getInstance().getWatchService().take();
                     }
                     catch (ClosedWatchServiceException ex)
@@ -179,8 +178,8 @@ public class Singleton
             final int BACKLOG = 0;
             final String BIND_ADDRESS = devices[index].getLocalIP().asFormattedString();
 
-            Singleton.getInstance().setServer(new ServerSocket(PORT, BACKLOG, InetAddress.getByName(BIND_ADDRESS)));
-            Singleton.getInstance().setDevice(devices[index]);
+            this.server = new ServerSocket(PORT, BACKLOG, InetAddress.getByName(BIND_ADDRESS));
+            this.device = devices[index];
             break;
         }
         catch (BindException ex)
@@ -192,7 +191,7 @@ public class Singleton
             ex.printStackTrace(System.out);
         }
 
-        if (Singleton.getInstance().getServer() == null)
+        if (this.server == null)
         {
             System.err.print("No usable network devices are available" + NEWLINE);
             System.exit(0xFFFFFFFF);
@@ -210,12 +209,15 @@ public class Singleton
             }
         }));
     }
-    public static final Singleton getInstance() { return instance; }
     //endregion
     //region properties
+    public static final String NEWLINE = DefaultSystemPropertyStrings.LINE_SEPARATOR;
     public final String CWD;
     public final String WEB_ROOT;
     public final ClassLoader classLoader;
+    public final ScriptEngine scriptEngine;
+    public final String[] extensions;
+    public final String[] contentTypes;
  
     private Device device;
     private ServerSocket server;
@@ -224,14 +226,6 @@ public class Singleton
     private String[] fileNames;
     private String[] filePaths;
     private int fileCount;
-    private String[] extensions;
-    private String[] contentTypes;
-    
-    public static final String NEWLINE = DefaultSystemPropertyStrings.LINE_SEPARATOR;
-    public final ScriptEngine scriptEngine;
-    //endregion
-    //region Natives
-    private native void init();
     //endregion
     //region Getters
     public Device getDevice() { return this.device; }

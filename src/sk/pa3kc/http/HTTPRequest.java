@@ -75,7 +75,6 @@ public class HTTPRequest
         this.propertyNames = propertyNames.toArray(new String[0]);
         this.propertyValues = propertyValues.toArray(new String[0]);
         this.propertyCount = this.propertyNames.length;
-
     }
 
     public String getMethod() { return this.method; }
@@ -85,10 +84,4 @@ public class HTTPRequest
     public int getPropertyCount() { return this.propertyCount; }
     public String[] getPropertyNames() { return this.propertyNames; }
     public String[] getPropertyValues() { return this.propertyValues; }
-
-    static class HTTPRequestMethod
-    {
-        public static final String GET = "GET";
-        public static final String POST = "POST";
-    }
 }

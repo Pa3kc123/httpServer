@@ -51,10 +51,8 @@ public class HTTPResponse
         }
         else this.propertyValues.set(index, arg);
     }
-    public void setBody(String body)
-    {
-        this.body = body;
-    }
+    public void setBody(String body) { this.body = body; }
+    public String getBody() { return this.body; }
 
     //region Public methods
     public void writeHeaderToOutput()

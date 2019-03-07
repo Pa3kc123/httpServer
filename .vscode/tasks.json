@@ -5,22 +5,10 @@
             "label": "check dir tree",
             "type": "shell",
             "windows": {
-                "options": {
-                    "cwd": "${workspaceFolder}\\bin"
-                },
-                "args": [
-                    "@IF NOT EXIST production (mkdir production)",
-                    "@IF NOT EXIST headers (mkdir headers)",
-                    "@IF NOT EXIST native (mkdir native)"
-                ]
+                "command": "${workspaceFolder}\\.vscode\\checkDirTree.bat",
             },
             "linux": {
-                "options": {
-                    "cwd": "${workspaceFolder}\\bin"
-                },
-                "args": [
-                    "echo fail"
-                ]
+                "command": "echo fail"
             }
         },
         {
@@ -57,7 +45,6 @@
             "windows": {
                 "args": [
                     "-d", "bin\\production",
-                    "-h", "bin\\production\\headers",
                     "-classpath", "bin\\production",
                     "-bootclasspath", "${env:JAVA_HOME}\\jre\\lib\\rt.jar",
                     "-sourcepath", "src",
@@ -71,7 +58,6 @@
             "linux": {
                 "args": [
                     "-d", "bin/production",
-                    "-h", "bin/production/headers",
                     "-classpath", "bin/production",
                     "-bootclasspath", "${env:JAVA_HOME}/jre/lib/rt.jar",
                     "-sourcepath", "src",
