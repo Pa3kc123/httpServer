@@ -1,6 +1,3 @@
-bin/*
-bin/production/*
-bin/web/
-bin/*.jar
-bin/output.log
-lib/MyLibrary.jar
+target
+.idea
+*.iml
