@@ -21,7 +21,9 @@ class HttpServerThread : () -> Unit, AutoCloseable {
     override fun invoke() {
         while (true) {
             try {
-                clientCollection += Client(serverSocket.accept())
+                clientCollection += Client(serverSocket.accept()) {
+                    clientCollection - it
+                }
             } catch (e: Exception) {
                 when (e) {
                     is SocketException -> {

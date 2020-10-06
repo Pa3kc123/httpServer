@@ -1,16 +1,38 @@
 package sk.pa3kc.miniprojects
 
-import sk.pa3kc.miniprojects.util.SocketIO
-import sk.pa3kc.miniprojects.util.SocketInputStreamThread
-import java.io.InputStream
-import java.io.OutputStream
 import java.net.Socket
+import sk.pa3kc.miniprojects.data.HttpRequest
+import sk.pa3kc.miniprojects.util.InputStreamThread
 
-class Client(private val socket: Socket) : SocketIO(socket) {
-    private val sis: SocketInputStreamThread
-    private val sos: SocketOutputStreamThread
+class Client(
+    private val socket: Socket,
+    private val onClose: (Client) -> Unit
+) {
+    private val ist = InputStreamThread(this.socket.getInputStream(), 4096, ::onBytesReceived)
+    private val os = this.socket.getOutputStream()
 
-    init {
+    private val requestBuilder = HttpRequest.Builder()
+    lateinit var request: HttpRequest
+
+    fun onBytesReceived(bytes: ByteArray) {
+        val data = String(bytes, Charsets.UTF_8)
+        println(data)
+        this.requestBuilder.append(data)
+
+        if (data.endsWith(HTTP_LINE_BREAK.repeat(2))) {
+            onReceiveCompleted()
+        }
+    }
+
+    open fun onReceiveCompleted() {
+        onHttpRequest(this.requestBuilder.build())
+    }
+
+    open fun onHttpRequest(request: HttpRequest) {
+        this.request = request;
+    }
+
+    fun sendHttpResponse(response: HttpResponse) {
 
     }
 }
