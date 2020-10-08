@@ -2,7 +2,7 @@ package sk.pa3kc.miniprojects.thread
 
 import sk.pa3kc.miniprojects.AppConfig
 import sk.pa3kc.miniprojects.Client
-import sk.pa3kc.miniprojects.util.LimitedArrayList
+import sk.pa3kc.miniprojects.util.ClientCollection
 import java.lang.Exception
 import java.net.ServerSocket
 import java.net.SocketException
@@ -10,9 +10,11 @@ import java.net.SocketException
 class HttpServerThread : () -> Unit, AutoCloseable {
     private val thread = Thread(this)
 
-    private val clientCollection = LimitedArrayList<Client>(AppConfig.MAX_ALLOWED_CONNECTIONS)
+    private val clientCollection = ClientCollection()
     private val serverSocket = ServerSocket(AppConfig.SERVER_PORT)
     private var isClosed = false
+
+    private val getHandlers = ArrayList<() -> Unit>()
 
     init {
         thread.start()
@@ -24,9 +26,11 @@ class HttpServerThread : () -> Unit, AutoCloseable {
     override fun invoke() {
         while (true) {
             try {
-                clientCollection += Client(serverSocket.accept()) {
-                    clientCollection - it
-                }
+                clientCollection.add(
+                    Client(serverSocket.accept()) {
+                        clientCollection.remove(it)
+                    }
+                )
             } catch (e: Exception) {
                 when (e) {
                     is SocketException -> {

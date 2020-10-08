@@ -1,33 +1,77 @@
 package sk.pa3kc.miniprojects.util
 
-class FixedSizeArrayList<T>(
-    private val maxCapacity: Int
-) : ArrayList<T>(maxCapacity) {
-    override fun add(element: T) = if (super.size < this.maxCapacity) super.add(element) else false
+import sk.pa3kc.miniprojects.AppConfig
+import sk.pa3kc.miniprojects.Client
+import kotlin.collections.ArrayList
 
-    override fun add(index: Int, element: T){
-        if (super.size < this.maxCapacity) {
-            super.add(index, element)
-        }
-    }
+class ClientCollection : Collection<Client> {
+    override val size = AppConfig.MAX_ALLOWED_CONNECTIONS
 
-    override fun addAll(elements: Collection<T>): Boolean {
-        val range = super.size + elements.size
+    private val indices = BooleanArray(this.size)
+    private val clients = arrayOfNulls<Client?>(this.size)
 
-        if (range > this.maxCapacity) {
-            val arr = arrayOfNulls<Any?>(range)
+    fun add(client: Client) = plus(client)
+    fun remove(client: Client) = minus(client)
 
-            var i = 0
-            for (element in elements) {
-                arr[i++] = element
+    operator fun plus(client: Client): Boolean {
+        if (this.contains(client)) return false
 
-
+        for ((i, index) in this.indices.withIndex()) {
+            if (!index) {
+                this.clients[i] = client
+                this.indices[i] = true
+                return true
             }
-        } else super.addAll(elements)
+        }
+        return false
     }
 
-    override fun addAll(index: Int, elements: Collection<T>): Boolean {
-        return super.addAll(index, elements)
+    operator fun minus(client: Client): Boolean {
+        val index = this.indexOf(client)
+        if (index == -1) return false
+
+        this.clients[index] = null
+        this.indices[index] = false
+        return true
+    }
+
+    override fun contains(element: Client): Boolean {
+        for (client in clients) {
+            if (client?.equals(element) == true) {
+                return true
+            }
+        }
+        return false
+    }
+
+    override fun containsAll(elements: Collection<Client>): Boolean {
+        for (element in elements) {
+            if (!this.contains(element)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    override fun isEmpty(): Boolean {
+        for (index in indices) {
+            if (index) {
+                return false
+            }
+        }
+        return true
+    }
+
+    override fun iterator() = ClientCollectionIterator(this.clients.filterNotNull().toTypedArray())
+
+    inner class ClientCollectionIterator(
+        private val clients: Array<out Client>
+    ) : Iterator<Client> {
+        private var i = 0
+
+        override fun hasNext() = i < this.clients.size
+
+        override fun next(): Client = this.clients[i]
     }
 }
 

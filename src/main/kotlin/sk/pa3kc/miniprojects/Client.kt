@@ -20,7 +20,7 @@ class Client(
         println(data)
         this.requestBuilder.append(data)
 
-        if (data.endsWith(HTTP_LINE_BREAK.repeat(2))) {
+        if (data.endsWith(HTTP_MESSAGE_DIVIDER)) {
             onReceiveCompleted()
         }
     }
