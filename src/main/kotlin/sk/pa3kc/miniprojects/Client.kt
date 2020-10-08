@@ -2,6 +2,7 @@ package sk.pa3kc.miniprojects
 
 import java.net.Socket
 import sk.pa3kc.miniprojects.data.HttpRequest
+import sk.pa3kc.miniprojects.data.HttpResponse
 import sk.pa3kc.miniprojects.util.InputStreamThread
 
 class Client(

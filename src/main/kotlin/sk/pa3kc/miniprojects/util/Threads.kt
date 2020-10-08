@@ -4,7 +4,23 @@ import java.io.Closeable
 import java.io.IOException
 import java.io.InputStream
 import java.lang.Exception
-import java.nio.ByteBuffer
+
+class BackgroundJob(private val job: () -> Unit) : () -> Unit {
+    private val thread = Thread(this)
+
+    init {
+        this.thread.start()
+    }
+
+    open fun onJobCompleted() {}
+
+    override fun invoke() {
+        job()
+        onJobCompleted()
+    }
+}
+
+fun doInBackground(job: () -> Unit) = BackgroundJob(job)
 
 class InputStreamThread(
     private val inputStream: InputStream,

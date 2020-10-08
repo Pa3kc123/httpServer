@@ -18,6 +18,9 @@ class HttpServerThread : () -> Unit, AutoCloseable {
         thread.start()
     }
 
+    fun settings(block: SettingsUpdater.() -> Unit) = SettingsUpdater().apply(block).applyChanges()
+
+
     override fun invoke() {
         while (true) {
             try {
@@ -36,5 +39,15 @@ class HttpServerThread : () -> Unit, AutoCloseable {
 
     override fun close() {
         this.isClosed = true
+    }
+
+    inner class SettingsUpdater {
+        fun addGet(getHandler: () -> Unit) {
+            getHandlers.add(getHandler)
+        }
+
+        fun applyChanges() {
+
+        }
     }
 }

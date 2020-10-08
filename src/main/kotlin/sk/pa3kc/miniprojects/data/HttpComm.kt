@@ -13,7 +13,7 @@ class HttpRequest {
     class Builder {
         private val stringBuilder = StringBuilder()
 
-        fun append(data: String) = this.stringBuilder.append(data)
+        fun append(data: String): StringBuilder = this.stringBuilder.append(data)
 
         @Throws(IllegalStateException::class)
         fun build() = HttpRequest().apply {
@@ -53,7 +53,7 @@ class HttpResponse {
     class Builder {
         private val stringBuilder = StringBuilder()
 
-        fun append(data: String) = this.stringBuilder.append(data)
+        fun append(data: String): StringBuilder = this.stringBuilder.append(data)
 
         @Throws(IllegalStateException::class)
         fun build() = HttpResponse().apply {
@@ -80,10 +80,6 @@ class HttpResponse {
             }
         }
     }
-}
-
-typealias babyObj = {
-
 }
 
 class HttpRequestHead {

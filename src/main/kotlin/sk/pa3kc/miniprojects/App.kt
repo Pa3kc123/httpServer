@@ -13,4 +13,8 @@ fun main(args: Array<String>) {
         if (exists && isFile) throw IllegalStateException("Cannot create csv directory - exists file with same name")
         if (!exists && (mkdir() || mkdirs())) throw IllegalStateException("Cannot create csv directory - directory probably exists")
     }
+
+    httpServerThread.settings {
+        addGet()
+    }
 }

@@ -41,196 +41,196 @@ enum class HttpCode(val code: Int) {
     //This class of status code indicates the client must take additional action to complete the request. Many of these status codes are used in URL redirection.
     //A user agent may carry out the additional action with no user interaction only if the method used in the second request is GET or HEAD. A user agent may automatically redirect a request. A user agent should detect and intervene to prevent cyclical redirects.
 
-    MULTIPLE_CHOICES(300),
     //Indicates multiple options for the resource from which the client may choose (via agent-driven content negotiation). For example, this code could be used to present multiple video format options, to list files with different filename extensions, or to suggest word-sense disambiguation.
-    MOVED_PERMANENTLY(301),
+    MULTIPLE_CHOICES(300),
     //This and all future requests should be directed to the given URI.
-    FOUND(302),
+    MOVED_PERMANENTLY(301),
     //Tells the client to look at (browse to) another URL. has been superseded by 303 and 307. This is an example of industry practice contradicting the standard. The HTTP/1.0 specification (RFC 1945) required the client to perform a temporary redirect (the original describing phrase was "Moved Temporarily"), but popular browsers implemented 302 with the functionality of a 303 See Other. Therefore, HTTP/1.1 added status codes 303 and 307 to distinguish between the two behaviours. However, some Web applications and frameworks use the 302 status code as if it were the 303
-    SEE_OTHER(303),
+    FOUND(302),
     //The response to the request can be found under another URI using the GET method. When received in response to a POST (or PUT/DELETE), the client should presume that the server has received the data and should issue a new GET request to the given URI.
-    NOT_MODIFIED(304),
+    SEE_OTHER(303),
     //Indicates that the resource has not been modified since the version specified by the request headers If-Modified-Since or If-None-Match. In such case, there is no need to retransmit the resource since the client still has a previously-downloaded copy.
-    USE_PROXY(305),
+    NOT_MODIFIED(304),
     //The requested resource is available only through a proxy, the address for which is provided in the response. For security reasons, many HTTP clients (such as Mozilla Firefox and Internet Explorer) do not obey this status code.
-    SWITCH_PROXY(306),
+    USE_PROXY(305),
     //No longer used. Originally meant "Subsequent requests should use the specified proxy."
-    TEMPORARY_REDIRECT(307),
+    SWITCH_PROXY(306),
     //In this case, the request should be repeated with another URI; however, future requests should still use the original URI. In contrast to how was historically implemented, the request method is not allowed to be changed when reissuing the original request. For example, a POST request should be repeated using another POST request
-    PERMANENT_REDIRECT(308),
+    TEMPORARY_REDIRECT(307),
     //The request and all future requests should be repeated using another URI. and 308 parallel the behaviors of 302 and 301, but do not allow the HTTP method to change. So, for example, submitting a form to a permanently redirected resource may continue smoothly.
+    PERMANENT_REDIRECT(308),
 
     //4xx client errors
     //This class of status code is intended for situations in which the error seems to have been caused by the client. Except when responding to a HEAD request, the server should include an entity containing an explanation of the error situation, and whether it is a temporary or permanent condition. These status codes are applicable to any request method. User agents should display any included entity to the user.
 
-    BAD_REQUEST(400),
     //The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing).
-    UNAUTHORIZED(401),
+    BAD_REQUEST(400),
     //Similar to Forbidden, but specifically for use when authentication is required and has failed or has not yet been provided. The response must include a WWW-Authenticate header field containing a challenge applicable to the requested resource. See Basic access authentication and Digest access authentication. 401 semantically means "unauthorised", the user does not have valid authentication credentials for the target resource.
     //Note: Some sites incorrectly issue HTTP when an IP address is banned from the website (usually the website domain) and that specific address is refused permission to access a website.[citation needed]
-    PAYMENT_REQUIRED(402),
+    UNAUTHORIZED(401),
     //Reserved for future use. The original intention was that this code might be used as part of some form of digital cash or micropayment scheme, as proposed, for example, by GNU Taler, but that has not yet happened, and this code is not widely used. Google Developers API uses this status if a particular developer has exceeded the daily limit on requests. Sipgate uses this code if an account does not have sufficient funds to start a call. Shopify uses this code when the store has not paid their fees and is temporarily disabled. Stripe uses this code for failed payments where parameters were correct, for example blocked fraudulent payments.
-    FORBIDDEN(403),
+    PAYMENT_REQUIRED(402),
     //The request contained valid data and was understood by the server, but the server is refusing action. This may be due to the user not having the necessary permissions for a resource or needing an account of some sort, or attempting a prohibited action (e.g. creating a duplicate record where only one is allowed). This code is also typically used if the request provided authentication by answering the WWW-Authenticate header field challenge, but the server did not accept that authentication. The request should not be repeated.
-    NOT_FOUND(404),
+    FORBIDDEN(403),
     //The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible.
-    METHOD_NOT_ALLOWED(405),
+    NOT_FOUND(404),
     //A request method is not supported for the requested resource; for example, a GET request on a form that requires data to be presented via POST, or a PUT request on a read-only resource.
-    NOT_ACCEPTABLE(406),
+    METHOD_NOT_ALLOWED(405),
     //The requested resource is capable of generating only content not acceptable according to the Accept headers sent in the request. See Content negotiation.
-    PROXY_AUTHENTICATION_REQUIRED(407),
+    NOT_ACCEPTABLE(406),
     //The client must first authenticate itself with the proxy.
-    REQUEST_TIMEOUT(408),
+    PROXY_AUTHENTICATION_REQUIRED(407),
     //The server timed out waiting for the request. According to HTTP specifications: "The client did not produce a request within the time that the server was prepared to wait. The client MAY repeat the request without modifications at any later time."
-    CONFLICT(409),
+    REQUEST_TIMEOUT(408),
     //Indicates that the request could not be processed because of conflict in the current state of the resource, such as an edit conflict between multiple simultaneous updates.
-    GONE(410),
+    CONFLICT(409),
     //Indicates that the resource requested is no longer available and will not be available again. This should be used when a resource has been intentionally removed and the resource should be purged. Upon receiving a status code, the client should not request the resource in the future. Clients such as search engines should remove the resource from their indices. Most use cases do not require clients and search engines to purge the resource, and a "404 Not Found" may be used instead.
-    LENGTH_REQUIRED(411),
+    GONE(410),
     //The request did not specify the length of its content, which is required by the requested resource.
-    PRECONDITION_FAILED(412),
+    LENGTH_REQUIRED(411),
     //The server does not meet one of the preconditions that the requester put on the request header fields.
-    PAYLOAD_TOO_LARGE(413),
+    PRECONDITION_FAILED(412),
     //The request is larger than the server is willing or able to process. Previously called "Request Entity Too Large".
-    URI_TOO_LONG(414),
+    PAYLOAD_TOO_LARGE(413),
     //The URI provided was too long for the server to process. Often the result of too much data being encoded as a query-string of a GET request, in which case it should be converted to a POST request. Called "Request-URI Too Long" previously.
-    UNSUPPORTED_MEDIA_TYPE(415),
+    URI_TOO_LONG(414),
     //The request entity has a media type which the server or resource does not support. For example, the client uploads an image as image/svg+xml, but the server requires that images use a different format.
-    RANGE_NOT_SATISFIABLE(416),
+    UNSUPPORTED_MEDIA_TYPE(415),
     //The client has asked for a portion of the file (byte serving), but the server cannot supply that portion. For example, if the client asked for a part of the file that lies beyond the end of the file. Called "Requested Range Not Satisfiable" previously.
-    EXPECTATION_FAILED(417),
+    RANGE_NOT_SATISFIABLE(416),
     //The server cannot meet the requirements of the Expect request-header field.
-    IM_A_TEAPOT(418),
+    EXPECTATION_FAILED(417),
     //This code was defined in 1as one of the traditional IETF April Fools' jokes, in RFC 2324, Hyper Text Coffee Pot Control Protocol, and is not expected to be implemented by actual HTTP servers. The RFC specifies this code should be returned by teapots requested to brew coffee. This HTTP status is used as an Easter egg in some websites, such as Google.com's I'm a teapot easter egg.
-    MISDIRECTED_REQUEST(421),
+    IM_A_TEAPOT(418),
     //The request was directed at a server that is not able to produce a response (for example because of connection reuse).
-    UNPROCESSABLE_ENTITY(422),
+    MISDIRECTED_REQUEST(421),
     //The request was well-formed but was unable to be followed due to semantic errors.
-    LOCKED(423),
+    UNPROCESSABLE_ENTITY(422),
     //The resource that is being accessed is locked.
-    FAILED_DEPENDENCY(424),
+    LOCKED(423),
     //The request failed because it depended on another request and that request failed (e.g., a PROPPATCH).
-    TOO_EARLY(425),
+    FAILED_DEPENDENCY(424),
     //Indicates that the server is unwilling to risk processing a request that might be replayed.
-    UPGRADE_REQUIRED(426),
+    TOO_EARLY(425),
     //The client should switch to a different protocol such as TLS/1.0, given in the Upgrade header field.
-    PRECONDITION_REQUIRED(428),
+    UPGRADE_REQUIRED(426),
     //The origin server requires the request to be conditional. Intended to prevent the 'lost update' problem, where a client GETs a resource's state, modifies it, and PUTs it back to the server, when meanwhile a third party has modified the state on the server, leading to a conflict.
-    TOO_MANY_REQUESTS(429),
+    PRECONDITION_REQUIRED(428),
     //The user has sent too many requests in a given amount of time. Intended for use with rate-limiting schemes.
-    REQUEST_HEADER_FIELDS_TOO_LARGE(431),
+    TOO_MANY_REQUESTS(429),
     //The server is unwilling to process the request because either an individual header field, or all the header fields collectively, are too large.
-    UNAVAILABLE_FOR_LEGAL_REASONS(451),
+    REQUEST_HEADER_FIELDS_TOO_LARGE(431),
     //A server operator has received a legal demand to deny access to a resource or to a set of resources that includes the requested resource. The code was chosen as a reference to the novel Fahrenheit 451 (see the Acknowledgements in the RFC).
+    UNAVAILABLE_FOR_LEGAL_REASONS(451),
 
     //5xx server errors
     //The server failed to fulfill a request.
     //Response status codes beginning with the digit "5" indicate cases in which the server is aware that it has encountered an error or is otherwise incapable of performing the request. Except when responding to a HEAD request, the server should include an entity containing an explanation of the error situation, and indicate whether it is a temporary or permanent condition. Likewise, user agents should display any included entity to the user. These response codes are applicable to any request method.
 
-    INTERNAL_SERVER_ERROR(500),
     //A generic error message, given when an unexpected condition was encountered and no more specific message is suitable.
-    NOT_IMPLEMENTED(501),
+    INTERNAL_SERVER_ERROR(500),
     //The server either does not recognize the request method, or it lacks the ability to fulfil the request. Usually this implies future availability (e.g., a new feature of a web-service API).
-    BAD_GATEWAY(502),
+    NOT_IMPLEMENTED(501),
     //The server was acting as a gateway or proxy and received an invalid response from the upstream server.
-    SERVICE_UNAVAILABLE(503),
+    BAD_GATEWAY(502),
     //The server cannot handle the request (because it is overloaded or down for maintenance). Generally, this is a temporary state.
-    GATEWAY_TIMEOUT(504),
+    SERVICE_UNAVAILABLE(503),
     //The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.
-    HTTP_VERSION_NOT_SUPPORTED(505),
+    GATEWAY_TIMEOUT(504),
     //The server does not support the HTTP protocol version used in the request.
-    VARIANT_ALSO_NEGOTIATES(506),
+    HTTP_VERSION_NOT_SUPPORTED(505),
     //Transparent content negotiation for the request results in a circular reference.
-    INSUFFICIENT_STORAGE(507),
+    VARIANT_ALSO_NEGOTIATES(506),
     //The server is unable to store the representation needed to complete the request.
-    LOOP_DETECTED(508),
+    INSUFFICIENT_STORAGE(507),
     //The server detected an infinite loop while processing the request (sent instead of Already Reported).
-    NOT_EXTENDED(510),
+    LOOP_DETECTED(508),
     //Further extensions to the request are required for the server to fulfil it.
-    NETWORK_AUTHENTICATION_REQUIRED(511),
+    NOT_EXTENDED(510),
     //The client needs to authenticate to gain network access. Intended for use by intercepting proxies used to control access to the network (e.g., "captive portals" used to require agreement to Terms of Service before granting full Internet access via a Wi-Fi hotspot).
+    NETWORK_AUTHENTICATION_REQUIRED(511),
 
     //Unofficial codes
     //The following codes are not specified by any standard.
 
-    CHECKPOINT(103),
     //Used in the resumable requests proposal to resume aborted PUT or POST requests.
-    THIS_IS_FINE(218),
+    CHECKPOINT(103),
     //Used as a catch-all error condition for allowing response bodies to flow through Apache when ProxyErrorOverride is enabled. When ProxyErrorOverride is enabled in Apache, response bodies that contain a status code of 4xx or 5xx are automatically discarded by Apache in favor of a generic response or a custom response specified by the ErrorDocument directive.
-    PAGE_EXPIRED(419),
+    THIS_IS_FINE(218),
     //Used by the Laravel Framework when a CSRF Token is missing or expired.
-    METHOD_FAILURE(420),
+    PAGE_EXPIRED(419),
     //A deprecated response used by the Spring Framework when a method has failed.
-    ENHANCE_YOUR_CALM(420),
+    METHOD_FAILURE(420),
     //Returned by version 1 of the Twitter Search and Trends API when the client is being rate limited; versions 1.1 and later use the Too Many Requests response code instead. The phrase "Enhance your calm" comes from the 1993 movie Demolition Man, and its association with this number is likely a reference to cannabis.[citation needed]
-    REQUEST_HEADER_FIELDS_TOO_LARGE_VER1(430),
+    ENHANCE_YOUR_CALM(420),
     //Used by Shopify, instead of the Too Many Requests response code, when too many URLs are requested within a certain time frame.
-    BLOCKED_BY_WINDOWS_PARENTAL_CONTROLS(450),
+    REQUEST_HEADER_FIELDS_TOO_LARGE_VER1(430),
     //The Microsoft extension code indicated when Windows Parental Controls are turned on and are blocking access to the requested webpage.
-    INVALID_TOKEN(498),
+    BLOCKED_BY_WINDOWS_PARENTAL_CONTROLS(450),
     //Returned by ArcGIS for Server. Code indicates an expired or otherwise invalid token.
-    TOKEN_REQUIRED(499),
+    INVALID_TOKEN(498),
     //Returned by ArcGIS for Server. Code indicates that a token is required but was not submitted.
-    BANDWIDTH_LIMIT_EXCEEDED(509),
+    TOKEN_REQUIRED(499),
     //The server has exceeded the bandwidth specified by the server administrator; this is often used by shared hosting providers to limit the bandwidth of customers.
-    INVALID_SSL_CERTIFICATE(526),
+    BANDWIDTH_LIMIT_EXCEEDED(509),
     //Used by Cloudflare and Cloud Foundry's gorouter to indicate failure to validate the SSL/TLS certificate that the origin server presented.
-    SITE_IS_OVERLOADED(529),
+    INVALID_SSL_CERTIFICATE(526),
     //Used by Qualys in the SSLLabs server testing API to signal that the site can't process the request.
-    SITE_IS_FROZEN(530),
+    SITE_IS_OVERLOADED(529),
     //Used by the Pantheon web platform to indicate a site that has been frozen due to inactivity.
-    NETWORK_READ_TIMEOUT_ERROR(598),
+    SITE_IS_FROZEN(530),
     //Used by some HTTP proxies to signal a network read timeout behind the proxy to a client in front of the proxy.
+    NETWORK_READ_TIMEOUT_ERROR(598),
 
     //Internet Information Services
     //Microsoft's Internet Information Services (IIS) web server expands the 4xx error space to signal errors with the client's request.
 
-    LOGIN_TIME_OUT(440),
     //The client's session has expired and must log in again.
-    RETRY_WITH(449),
+    LOGIN_TIME_OUT(440),
     //The server cannot honour the request because the user has not provided the required information.
-    REDIRECT(451),
+    RETRY_WITH(449),
     //Used in Exchange ActiveSync when either a more efficient server is available or the server cannot access the users' mailbox. The client is expected to re-run the HTTP AutoDiscover operation to find a more appropriate server.
+    REDIRECT(451),
 
     //IIS sometimes uses additional decimal sub-codes for more specific information, however these sub-codes only appear in the response payload and in documentation, not in the place of an actual HTTP status code.
 
     //nginx
     //The nginx web server software expands the 4xx error space to signal issues with the client's request.
 
-    NO_RESPONSE(444),
     //Used internally to instruct the server to return no information to the client and close the connection immediately.
-    REQUEST_HEADER_TOO_LARGE(494),
+    NO_RESPONSE(444),
     //Client sent too large request or too long header line.
-    SSL_CERTIFICATE_ERROR(495),
+    REQUEST_HEADER_TOO_LARGE(494),
     //An expansion of the Bad Request response code, used when the client has provided an invalid client certificate.
-    SSL_CERTIFICATE_REQUIRED(496),
+    SSL_CERTIFICATE_ERROR(495),
     //An expansion of the Bad Request response code, used when a client certificate is required but not provided.
-    HTTP_REQUEST_SENT_TO_HTTPS_PORT(497),
+    SSL_CERTIFICATE_REQUIRED(496),
     //An expansion of the Bad Request response code, used when the client has made a HTTP request to a port listening for HTTPS requests.
-    CLIENT_CLOSED_REQUEST(499),
+    HTTP_REQUEST_SENT_TO_HTTPS_PORT(497),
     //Used when the client has closed the request before the server could send a response.
+    CLIENT_CLOSED_REQUEST(499),
 
     //Cloudflare
     //Cloudflare's reverse proxy service expands the 5xx series of errors space to signal issues with the origin server.
 
-    WEB_SERVER_RETURNED_AN_UNKNOWN_ERROR(520),
     //The origin server returned an empty, unknown, or unexplained response to Cloudflare.
-    WEB_SERVER_IS_DOWN(521),
+    WEB_SERVER_RETURNED_AN_UNKNOWN_ERROR(520),
     //The origin server has refused the connection from Cloudflare.
-    CONNECTION_TIMED_OUT(522),
+    WEB_SERVER_IS_DOWN(521),
     //Cloudflare could not negotiate a TCP handshake with the origin server.
-    ORIGIN_IS_UNREACHABLE(523),
+    CONNECTION_TIMED_OUT(522),
     //Cloudflare could not reach the origin server; for example, if the DNS records for the origin server are incorrect.
-    A_TIMEOUT_OCCURRED(524),
+    ORIGIN_IS_UNREACHABLE(523),
     //Cloudflare was able to complete a TCP connection to the origin server, but did not receive a timely HTTP response.
-    SSL_HANDSHAKE_FAILED(525),
+    A_TIMEOUT_OCCURRED(524),
     //Cloudflare could not negotiate a SSL/TLS handshake with the origin server.
-    INVALID_SSL_CERTIFICATE_CLOUDFLARE(526),
+    SSL_HANDSHAKE_FAILED(525),
     //Cloudflare could not validate the SSL certificate on the origin web server.
-    RAILGUN_ERROR(527),
+    INVALID_SSL_CERTIFICATE_CLOUDFLARE(526),
     //Error indicates an interrupted connection between Cloudflare and the origin server's Railgun server.
-    UNKNOWN1(530),
+    RAILGUN_ERROR(527),
     //Error is returned along with a 1xxx error.
+    UNKNOWN1(530),
 
     //AWS Elastic Load Balancer
     //Amazon's Elastic Load Balancing adds a few custom 4xx return codes
