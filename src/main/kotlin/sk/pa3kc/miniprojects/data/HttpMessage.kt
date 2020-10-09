@@ -1,12 +1,43 @@
 package sk.pa3kc.miniprojects.data
 
-import java.lang.StringBuilder
-import sk.pa3kc.miniprojects.HTTP_LINE_BREAK
-import sk.pa3kc.miniprojects.HTTP_MESSAGE_DIVIDER
-import sk.pa3kc.miniprojects.http.HttpCode
-import sk.pa3kc.miniprojects.http.HttpMethod
+import sk.pa3kc.miniprojects.DEFAULT_HTTP_PROTOCOL
 
-class HttpRequest {
+interface HttpMessage {
+    var statusLine: String
+    var headers: Map<out String, String>
+    var body: String?
+}
+
+data class HttpRequest(
+    override var statusLine: String,
+    override var headers: Map<out String, String>,
+    override var body: String?
+) : HttpMessage
+
+data class HttpResponse(
+    override var statusLine: String,
+    override var headers: Map<out String, String>,
+    override var body: String?
+) : HttpMessage
+
+fun newHttpRequest(
+    method: HttpMethodType = HttpMethodType.GET,
+    path: String = "index.html",
+    protocol: String = DEFAULT_HTTP_PROTOCOL,
+    headers: Map<out String, String>,
+    body: String? = null
+) = HttpRequest("$method $path $protocol", headers, body)
+
+fun newHttpResponse(
+    protocol: String = DEFAULT_HTTP_PROTOCOL,
+    statusCode: HttpStatusCode = HttpStatusCode.OK,
+    reasonPhrase: String? = null,
+    headers: Map<out String, String>,
+    body: String? = null
+) = HttpRequest("$protocol ${statusCode.code} ${reasonPhrase ?: statusCode.message}", headers, body)
+
+/*
+class HttpRequest : HttpMessage() {
     val head = HttpRequestHead()
     var body: String? = null
 
@@ -26,7 +57,7 @@ class HttpRequest {
 
                 with(this[0].split(HTTP_LINE_BREAK)) {
                     with(this[0].split("\\s")) {
-                        this@apply.head.method = HttpMethod.valueOf(this[0])
+                        this@apply.head.method = HttpMethodType.valueOf(this[0])
                         this@apply.head.path = this[1]
                         this@apply.head.protocol = this[2]
                     }
@@ -66,7 +97,7 @@ class HttpResponse {
 
                 with(this[0].split(HTTP_LINE_BREAK)) {
                     with(this[0].split("\\s")) {
-                        this@apply.head.method = HttpMethod.valueOf(this[0])
+                        this@apply.head.method = HttpMethodType.valueOf(this[0])
                         this@apply.head.path = this[1]
                         this@apply.head.protocol = this[2]
                     }
@@ -81,16 +112,4 @@ class HttpResponse {
         }
     }
 }
-
-class HttpRequestHead {
-    var method = HttpMethod.GET
-    var path = "/index.html"
-    var protocol = "HTTP/1.1"
-    var headers = HashMap<String, String>()
-}
-
-class HttpResponseHead {
-    var protocol = "HTTP/1.1"
-    var responseCode = HttpCode.NOT_FOUND
-    var headers = HashMap<String, String>()
-}
+*/

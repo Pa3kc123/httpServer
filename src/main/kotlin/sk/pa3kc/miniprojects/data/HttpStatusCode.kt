@@ -1,6 +1,6 @@
-package sk.pa3kc.miniprojects.http
+package sk.pa3kc.miniprojects.data
 
-enum class HttpCode(val code: Int) {
+enum class HttpStatusCode(val code: Int) {
     //1xx informational response
     //An informational response indicates that the request was received and understood. It is issued on a provisional basis while request processing continues. It alerts the client to wait for a final response. The message consists only of the status line and optional header fields, and is terminated by an empty line. As the HTTP/1.0 standard did not define any 1xx status codes, servers must not[note 1] send a 1xx response to an HTTP/1.0 compliant client except under experimental conditions.
 
@@ -241,5 +241,7 @@ enum class HttpCode(val code: Int) {
     //The load balancer received an X-Forwarded-For request header with more than 30 IP addresses.
     UNKNOWN3(463);
 
-    override fun toString() = super.name
+    val message = super.name
+
+    override fun toString() = "$code $message"
 }

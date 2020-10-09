@@ -15,6 +15,8 @@ fun main(args: Array<String>) {
     }
 
     httpServerThread.settings {
-        addGet()
+        this.sGetHandler("/root") {
+            "<h1>Hello World!</h1>"
+        }
     }
 }

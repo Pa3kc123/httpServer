@@ -10,10 +10,7 @@ class ClientCollection : Collection<Client> {
     private val indices = BooleanArray(this.size)
     private val clients = arrayOfNulls<Client?>(this.size)
 
-    fun add(client: Client) = plus(client)
-    fun remove(client: Client) = minus(client)
-
-    operator fun plus(client: Client): Boolean {
+    fun add(client: Client): Boolean {
         if (this.contains(client)) return false
 
         for ((i, index) in this.indices.withIndex()) {
@@ -25,8 +22,7 @@ class ClientCollection : Collection<Client> {
         }
         return false
     }
-
-    operator fun minus(client: Client): Boolean {
+    fun remove(client: Client): Boolean {
         val index = this.indexOf(client)
         if (index == -1) return false
 
@@ -34,6 +30,9 @@ class ClientCollection : Collection<Client> {
         this.indices[index] = false
         return true
     }
+
+    operator fun plus(client: Client) = add(client)
+    operator fun minus(client: Client) = remove(client)
 
     override fun contains(element: Client): Boolean {
         for (client in clients) {

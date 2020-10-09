@@ -12,7 +12,7 @@ class Client(
     private val ist = InputStreamThread(this.socket.getInputStream(), 4096, ::onBytesReceived)
     private val os = this.socket.getOutputStream()
 
-    private val requestBuilder = HttpRequest.Builder()
+    private val requestBuilder = HttpRequest()
     lateinit var request: HttpRequest
 
     fun onBytesReceived(bytes: ByteArray) {

@@ -6,24 +6,33 @@ import sk.pa3kc.miniprojects.util.ClientCollection
 import java.lang.Exception
 import java.net.ServerSocket
 import java.net.SocketException
+import sk.pa3kc.miniprojects.data.HttpAction
+import sk.pa3kc.miniprojects.data.HttpGet
+import sk.pa3kc.miniprojects.data.HttpGetAction
+import sk.pa3kc.miniprojects.data.HttpMethodType
 
-class HttpServerThread : () -> Unit, AutoCloseable {
+class HttpServerThread : Runnable, AutoCloseable {
+    private val settingsUpdater = SettingsUpdater()
     private val thread = Thread(this)
 
     private val clientCollection = ClientCollection()
     private val serverSocket = ServerSocket(AppConfig.SERVER_PORT)
     private var isClosed = false
 
-    private val getHandlers = ArrayList<() -> Unit>()
+    private val requestHandlers: Array<ArrayList<HttpAction>>
 
     init {
+        val httpMethodTypes = HttpMethodType.values()
+        this.requestHandlers = Array(httpMethodTypes.size) {
+            ArrayList()
+        }
+
         thread.start()
     }
 
-    fun settings(block: SettingsUpdater.() -> Unit) = SettingsUpdater().apply(block).applyChanges()
+    fun settings(block: SettingsUpdater.() -> Unit) = this.settingsUpdater.apply(block)
 
-
-    override fun invoke() {
+    override fun run() {
         while (true) {
             try {
                 clientCollection.add(
@@ -46,11 +55,16 @@ class HttpServerThread : () -> Unit, AutoCloseable {
     }
 
     inner class SettingsUpdater {
-        fun addGet(getHandler: () -> Unit) {
-            getHandlers.add(getHandler)
+        fun sGet(path: String, content: String) {
+            requestHandlers[HttpMethodType.GET.ordinal].add(HttpGetAction())
         }
+        fun dGet(path: String, action: () -> String) {
 
-        fun applyChanges() {
+        }
+        fun sPost(path: String, content: String) {
+
+        }
+        fun dPost(path: String, action: () -> String) {
 
         }
     }
