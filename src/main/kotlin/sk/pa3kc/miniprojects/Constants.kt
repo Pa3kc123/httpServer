@@ -2,7 +2,7 @@
 
 package sk.pa3kc.miniprojects
 
-const val CONFIG_FILE_PATH = "./config.yaml"
+const val CONFIG_FILE_PATH = "./config.properties"
 const val CSV_DIR_PATH = "./csv"
 
 const val HTTP_LINE_BREAK = "\r\n"

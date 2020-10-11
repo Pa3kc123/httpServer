@@ -1,24 +1,108 @@
 package sk.pa3kc.miniprojects.data
 
 import sk.pa3kc.miniprojects.DEFAULT_HTTP_PROTOCOL
+import sk.pa3kc.miniprojects.DELIMITER_CHECK
+import sk.pa3kc.miniprojects.HTTP_LINE_BREAK
+import sk.pa3kc.miniprojects.HTTP_MESSAGE_DIVIDER
+import sk.pa3kc.miniprojects.util.compareRangeFromEnd
+import kotlin.jvm.Throws
 
 interface HttpMessage {
-    var statusLine: String
-    var headers: Map<out String, String>
-    var body: String?
+    val statusLine: String
+    val headers: Map<out String, String>
+    val body: String?
 }
 
 data class HttpRequest(
-    override var statusLine: String,
-    override var headers: Map<out String, String>,
-    override var body: String?
-) : HttpMessage
+    val method: HttpMethodType,
+    val path: String,
+    val protocol: String,
+    override val headers: Map<out String, String>,
+    override val body: String?,
+    override val statusLine: String = "$method $path $protocol"
+) : HttpMessage {
+    override fun toString() = buildString {
+        append("$method $path $protocol ${System.lineSeparator()}")
+
+        for ((key, value) in headers) {
+            append("$key: $value${System.lineSeparator()}")
+        }
+
+        append(System.lineSeparator())
+        append(body)
+    }
+
+    class Builder {
+        private val bytes = ArrayList<Byte>()
+
+        fun append(bytes: ByteArray, offset: Int = 0, length: Int = bytes.size) {
+            if (offset > bytes.size) throw IndexOutOfBoundsException("offset is outside of bounds")
+            if (offset + length > bytes.size) throw IndexOutOfBoundsException("offset + length is outside of bounds")
+
+            for (byte in bytes) {
+                this.bytes.add(byte)
+            }
+        }
+
+        @Throws(IllegalStateException::class)
+        fun build(): HttpRequest {
+            val data = String(bytes.toByteArray(), Charsets.UTF_8)
+
+            if (!data.endsWith(HTTP_MESSAGE_DIVIDER)) {
+                throw IllegalStateException("Incomplete request")
+            }
+
+            val headData: String
+            val bodyData: String?
+
+            data.split(HTTP_MESSAGE_DIVIDER, limit = 2).also {
+                headData = it[0]
+                bodyData = if (it.size > 1) it[1] else null
+            }
+
+            val method: HttpMethodType
+            val path: String
+            val protocol: String
+            val headers = HashMap<String, String>()
+
+            headData.split(HTTP_LINE_BREAK).also { headerLines ->
+                headerLines[0].split("\\s", limit = 3).also {
+                    method = HttpMethodType.valueOf(it[0])
+                    path = it[1]
+                    protocol = it[2]
+                }
+
+                for (i in 1 until headerLines.size) {
+                    headerLines[i].split(":", limit = 2).also {
+                        headers[it[0]] = it[1]
+                    }
+                }
+            }
+
+            return newHttpRequest(method, path, protocol, headers, bodyData)
+        }
+    }
+}
 
 data class HttpResponse(
-    override var statusLine: String,
+    var protocol: String,
+    var statusCode: HttpStatusCode,
+    var reasonPhrase: String? = null,
     override var headers: Map<out String, String>,
-    override var body: String?
-) : HttpMessage
+    override var body: String?,
+    override var statusLine: String = "$protocol ${statusCode.code} ${reasonPhrase ?: statusCode.message}"
+) : HttpMessage {
+    override fun toString() = buildString {
+        append("$protocol $statusCode $reasonPhrase ${System.lineSeparator()}")
+
+        for ((key, value) in headers) {
+            append("$key: $value${System.lineSeparator()}")
+        }
+
+        append(System.lineSeparator())
+        append(body)
+    }
+}
 
 fun newHttpRequest(
     method: HttpMethodType = HttpMethodType.GET,
@@ -26,15 +110,15 @@ fun newHttpRequest(
     protocol: String = DEFAULT_HTTP_PROTOCOL,
     headers: Map<out String, String>,
     body: String? = null
-) = HttpRequest("$method $path $protocol", headers, body)
+) = HttpRequest(method, path, protocol, headers, body)
 
 fun newHttpResponse(
     protocol: String = DEFAULT_HTTP_PROTOCOL,
     statusCode: HttpStatusCode = HttpStatusCode.OK,
     reasonPhrase: String? = null,
-    headers: Map<out String, String>,
+    headers: Map<out String, String> = HashMap(),
     body: String? = null
-) = HttpRequest("$protocol ${statusCode.code} ${reasonPhrase ?: statusCode.message}", headers, body)
+) = HttpResponse(protocol, statusCode, reasonPhrase, headers, body)
 
 /*
 class HttpRequest : HttpMessage() {

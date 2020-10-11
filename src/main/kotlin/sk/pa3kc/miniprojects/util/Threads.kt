@@ -4,60 +4,40 @@ import java.io.Closeable
 import java.io.IOException
 import java.io.InputStream
 import java.lang.Exception
-
-class BackgroundJob(private val job: () -> Unit) : () -> Unit {
-    private val thread = Thread(this)
-
-    init {
-        this.thread.start()
-    }
-
-    open fun onJobCompleted() {}
-
-    override fun invoke() {
-        job()
-        onJobCompleted()
-    }
-}
-
-fun doInBackground(job: () -> Unit) = BackgroundJob(job)
+import java.net.SocketException
 
 class InputStreamThread(
     private val inputStream: InputStream,
     private val bufferSize: Int = 4096,
-    private val onReceive: (bytes: ByteArray) -> Unit,
+    private val onReceive: (bytes: ByteArray, byteCount: Int) -> Unit,
+    private val onSocketClosed: () -> Unit
 ) : () -> Unit, Closeable {
-    private val thread = Thread(this).also { it.start() }
-    private val buffer = ByteArray(bufferSize)
+    init {
+        Thread(this).also { it.start() }
+    }
 
     override fun invoke() {
+        val buffer = ByteArray(bufferSize)
         var byteCount: Int
-        val tmpBuffer = ByteArray(this.bufferSize)
 
-        while (true) {
+        loop@while (true) {
             try {
-                byteCount = this.inputStream.read(this.buffer)
+                byteCount = this.inputStream.read(buffer)
 
-                when (byteCount) {
-                    -1 -> break
-                    0 -> this.onReceive(ByteArray(0))
-                    this.bufferSize -> {
-                        System.arraycopy(this.buffer, 0, tmpBuffer, 0, this.bufferSize)
-                        this.onReceive(tmpBuffer)
-                    }
-                    else -> {
-                        val tmpBuff = ByteArray(byteCount)
-                        System.arraycopy(this.buffer, 0, tmpBuff, 0, this.bufferSize)
-                        this.onReceive(tmpBuff)
-                    }
-                }
+                if (byteCount == -1) break
+
+                this.onReceive(buffer, byteCount)
             } catch (e: Exception) {
-                if (e !is IOException) {
-                    e.printStackTrace()
+                when(e) {
+                    is SocketException -> onSocketClosed()
+                    else -> {
+                        e.printStackTrace()
+                        this.close()
+                    }
                 }
             }
         }
     }
 
-    override fun close() = this.inputStream.close()
+    override fun close() = try { this.inputStream.close() } finally {}
 }

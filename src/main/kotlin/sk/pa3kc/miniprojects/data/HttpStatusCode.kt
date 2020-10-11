@@ -241,7 +241,7 @@ enum class HttpStatusCode(val code: Int) {
     //The load balancer received an X-Forwarded-For request header with more than 30 IP addresses.
     UNKNOWN3(463);
 
-    val message = super.name
+    val message = super.name.replace('_', ' ')
 
     override fun toString() = "$code $message"
 }

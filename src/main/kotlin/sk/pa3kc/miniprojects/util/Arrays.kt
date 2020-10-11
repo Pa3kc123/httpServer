@@ -75,3 +75,16 @@ class ClientCollection : Collection<Client> {
 }
 
 fun <T> ArrayList<T>.addAll(vararg values: T) = this.addAll(values.toList())
+
+fun ByteArray.compareRangeFromEnd(validByteCount: Int = this.size, arr: ByteArray): Boolean {
+    val offset = arr.size
+    for (index in validByteCount - offset until validByteCount) {
+        val val1 = this[index]
+        val val2 = arr[index % offset]
+
+        if (this[index] != arr[index % offset]) {
+            return false
+        }
+    }
+    return true
+}

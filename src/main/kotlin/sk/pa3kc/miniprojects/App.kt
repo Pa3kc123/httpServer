@@ -1,11 +1,7 @@
 package sk.pa3kc.miniprojects
 
-import sk.pa3kc.miniprojects.thread.DirectoryWatcherThread
 import sk.pa3kc.miniprojects.thread.HttpServerThread
 import java.io.File
-
-@JvmField var directoryWatcherThread = DirectoryWatcherThread()
-@JvmField var httpServerThread = HttpServerThread()
 
 fun main(args: Array<String>) {
     with(File(CSV_DIR_PATH)) {
@@ -14,9 +10,9 @@ fun main(args: Array<String>) {
         if (!exists && (mkdir() || mkdirs())) throw IllegalStateException("Cannot create csv directory - directory probably exists")
     }
 
-    httpServerThread.settings {
-        this.sGetHandler("/root") {
-            "<h1>Hello World!</h1>"
+    HttpServerThread.settings {
+        this.get("/roots") { _, res ->
+            res.body = "<h1>Hello World!</h1>"
         }
     }
 }

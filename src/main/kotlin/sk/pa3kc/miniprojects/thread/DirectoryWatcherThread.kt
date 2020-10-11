@@ -3,9 +3,9 @@ package sk.pa3kc.miniprojects.thread
 import sk.pa3kc.miniprojects.CSV_DIR_PATH
 import java.nio.file.*
 
-class DirectoryWatcherThread : Runnable {
+object DirectoryWatcherThread : Runnable {
     override fun run() {
-        val nioPath = Paths.get(CSV_DIR_PATH)
+        /*val nioPath = Paths.get(CSV_DIR_PATH)
         val watchService = FileSystems.getDefault().newWatchService()
         nioPath.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE)
 
@@ -32,6 +32,6 @@ class DirectoryWatcherThread : Runnable {
             }
 
             if (!key.reset()) break
-        }
+        }*/
     }
 }
