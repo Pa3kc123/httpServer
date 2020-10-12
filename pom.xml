@@ -16,12 +16,50 @@
     <kotlin.version>1.4.10</kotlin.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <main.class>sk.pa3kc.miniprojects.AppKt</main.class>
+    <maven.test.skip>true</maven.test.skip>
   </properties>
 
   <build>
     <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
 
+    <resources>
+      <resource>
+        <directory>src/main/resources/external</directory>
+        <targetPath>${project.build.directory}</targetPath>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>default-resources</id>
+            <phase>none</phase>
+          </execution>
+          <execution>
+            <id>copy-resources</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+          <resources>
+            <resource>
+              <directory>src/main/resources/external</directory>
+              <targetPath>${project.build.directory}</targetPath>
+            </resource>
+          </resources>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.jetbrains.kotlin</groupId>
         <artifactId>kotlin-maven-plugin</artifactId>
@@ -29,7 +67,6 @@
         <executions>
           <execution>
             <id>compile</id>
-            <phase>process-sources</phase>
             <goals>
               <goal>compile</goal>
             </goals>
@@ -60,40 +97,39 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>3.2.0</version>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
         <executions>
           <execution>
-            <id>copy-resources</id>
-            <phase>validate</phase>
+            <id>default-compile</id>
+            <phase>none</phase>
+          </execution>
+          <execution>
+            <id>default-testCompile</id>
+            <phase>none</phase>
+          </execution>
+          <execution>
+            <id>java-compile</id>
+            <phase>compile</phase>
             <goals>
-              <goal>copy-resources</goal>
+              <goal>compile</goal>
             </goals>
           </execution>
+          <execution>
+            <id>java-testCompile</id>
+            <phase>test-compile</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+            <configuration>
+              <skip>${maven.test.skip}</skip>
+            </configuration>
+          </execution>
         </executions>
-        <configuration>
-          <outputDirectory>${basedir}/target</outputDirectory>
-          <resources>
-            <resource>
-              <directory>src/resources/external</directory>
-              <filtering>true</filtering>
-            </resource>
-          </resources>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.2.0</version>
-        <configuration>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
-<!--                <mainClass>sk.pa3kc.miniprojects.AppKt</mainClass>-->
-              <mainClass>${main.class}</mainClass>
-            </manifest>
-          </archive>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -116,31 +152,6 @@
                 <descriptorRef>jar-with-dependencies</descriptorRef>
               </descriptorRefs>
             </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
-        <executions>
-          <execution>
-            <id>compile</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>testCompile</id>
-            <phase>test-compile</phase>
-            <goals>
-              <goal>testCompile</goal>
-            </goals>
           </execution>
         </executions>
       </plugin>
