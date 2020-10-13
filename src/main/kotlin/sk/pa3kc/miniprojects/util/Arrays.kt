@@ -1,14 +1,15 @@
 package sk.pa3kc.miniprojects.util
 
-import sk.pa3kc.miniprojects.AppConfig
 import sk.pa3kc.miniprojects.Client
 import kotlin.collections.ArrayList
 
-class ClientCollection : Collection<Client> {
-    override val size = AppConfig.MAX_ALLOWED_CONNECTIONS
+class ClientCollection(
+    val maxSize: Int
+) : Collection<Client> {
+    override var size = 0
 
-    private val indices = BooleanArray(this.size)
-    private val clients = arrayOfNulls<Client?>(this.size)
+    private val indices = BooleanArray(this.maxSize)
+    private val clients = arrayOfNulls<Client?>(this.maxSize)
 
     fun add(client: Client): Boolean {
         if (this.contains(client)) return false
@@ -17,9 +18,11 @@ class ClientCollection : Collection<Client> {
             if (!index) {
                 this.clients[i] = client
                 this.indices[i] = true
+                this.size++
                 return true
             }
         }
+
         return false
     }
     fun remove(client: Client): Boolean {
@@ -28,6 +31,7 @@ class ClientCollection : Collection<Client> {
 
         this.clients[index] = null
         this.indices[index] = false
+        this.size--
         return true
     }
 
@@ -35,8 +39,8 @@ class ClientCollection : Collection<Client> {
     operator fun minus(client: Client) = remove(client)
 
     override fun contains(element: Client): Boolean {
-        for (client in clients) {
-            if (client?.equals(element) == true) {
+        for (i in this.indices.indices) {
+            if (this.indices[i] && this.clients[i]!! == element) {
                 return true
             }
         }
@@ -52,25 +56,30 @@ class ClientCollection : Collection<Client> {
         return true
     }
 
-    override fun isEmpty(): Boolean {
-        for (index in indices) {
-            if (index) {
-                return false
-            }
-        }
-        return true
-    }
+    @Suppress("ReplaceSizeZeroCheckWithIsEmpty")
+    override fun isEmpty(): Boolean = this.size == 0
 
-    override fun iterator() = ClientCollectionIterator(this.clients.filterNotNull().toTypedArray())
+    override fun iterator(): Iterator<Client> {
+        return if (this.isEmpty()) {
+            EmptyClientCollectionIterator
+        } else {
+            ClientCollectionIterator(this.clients.filterNotNull().toTypedArray())
+        }
+    }
 
     inner class ClientCollectionIterator(
         private val clients: Array<out Client>
     ) : Iterator<Client> {
         private var i = 0
 
-        override fun hasNext() = i < this.clients.size
+        override fun hasNext(): Boolean = i < this.clients.size
 
-        override fun next(): Client = this.clients[i]
+        override fun next(): Client = if (hasNext()) this.clients[i++] else throw NoSuchElementException()
+    }
+
+    object EmptyClientCollectionIterator : Iterator<Client> {
+        override fun hasNext() = false
+        override fun next(): Nothing = throw NoSuchElementException()
     }
 }
 

@@ -7,10 +7,10 @@ import sk.pa3kc.miniprojects.HTTP_MESSAGE_DIVIDER_BYTES
 import sk.pa3kc.miniprojects.util.compareRangeFromEnd
 
 interface HttpMessage {
-    val statusLine: String
     var headers: MutableMap<String, String>
     var body: String?
 
+    fun statusLine(): String
     fun parse(): String
 }
 
@@ -21,19 +21,18 @@ data class HttpRequest(
     override var headers: MutableMap<String, String> = HashMap(),
     override var body: String? = null,
 ) : HttpMessage {
-    override val statusLine = "$method $path $protocol"
+    override fun statusLine() = "$method $path $protocol"
 
     override fun parse() = buildString {
-        append("$method $path $protocol $HTTP_LINE_BREAK")
+        append("${statusLine()}$HTTP_LINE_BREAK")
 
-        for ((key, value) in headers) {
-            append("$key: $value$HTTP_LINE_BREAK")
+        for (key in headers.keys) {
+            append("$key: ${headers[key]}$HTTP_LINE_BREAK")
         }
         append(HTTP_LINE_BREAK)
 
         if (body != null) {
             append(body)
-            append(HTTP_MESSAGE_DIVIDER)
         }
     }
 
@@ -50,7 +49,6 @@ data class HttpRequest(
 
         if (body != null) {
             append(body)
-            append("\\r\\n${System.lineSeparator()}".repeat(2))
         }
     }
 }
@@ -62,20 +60,18 @@ data class HttpResponse(
     override var headers: MutableMap<String, String> = HashMap(),
     override var body: String? = null,
 ) : HttpMessage {
-    override val statusLine: String = "$protocol ${statusCode.code} ${reasonPhrase ?: statusCode.message}"
+    override fun statusLine() = "$protocol ${statusCode.code} ${reasonPhrase ?: statusCode.message}"
 
     override fun parse() = buildString {
-        append("$protocol $statusCode $reasonPhrase$HTTP_LINE_BREAK")
+        append("${statusLine()}$HTTP_LINE_BREAK")
 
-        for ((key, value) in headers) {
-            append("$key: $value$HTTP_LINE_BREAK")
+        for (key in headers.keys) {
+            append("$key: ${headers[key]}$HTTP_LINE_BREAK")
         }
-
-        append(HTTP_MESSAGE_DIVIDER)
+        append(HTTP_LINE_BREAK)
 
         if (body != null) {
             append(body)
-            append(HTTP_MESSAGE_DIVIDER)
         }
     }
 
@@ -92,7 +88,6 @@ data class HttpResponse(
 
         if (body != null) {
             append(body)
-            append("\\r\\n${System.lineSeparator()}".repeat(2))
         }
     }
 }

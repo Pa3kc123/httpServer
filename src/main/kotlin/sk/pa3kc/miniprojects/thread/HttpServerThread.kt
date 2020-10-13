@@ -10,11 +10,8 @@ import java.net.ServerSocket
 import java.net.SocketException
 
 object HttpServerThread : Runnable, AutoCloseable {
-    private val settingsUpdater = SettingsUpdater()
-
-    private val clientCollection = ClientCollection()
     private val serverSocket = ServerSocket(AppConfig.SERVER_PORT)
-    private var isClosed = false
+    private val clientCollection = ClientCollection(AppConfig.MAX_ALLOWED_CONNECTIONS)
 
     private val requestHandlers = Array<MutableMap<String, HttpAction>>(HttpMethodType.values().size) { HashMap() }
 
@@ -22,15 +19,12 @@ object HttpServerThread : Runnable, AutoCloseable {
         Thread(this).also { it.start() }
     }
 
-    fun settings(block: SettingsUpdater.() -> Unit) = this.settingsUpdater.apply(block)
-    fun onHandle(req: HttpRequest) {
-        val res = HttpResponse()
+    fun settings(block: SettingsUpdater.() -> Unit) = SettingsUpdater.apply(block)
+    fun onHandle(req: HttpRequest) = HttpResponse().also { res ->
         this.requestHandlers[req.method.ordinal][req.path]?.invoke(req, res) ?: res.apply {
             this.protocol = req.protocol
             this.statusCode = HttpStatusCode.NOT_FOUND
-            this.headers = req.headers.apply {
-                this["Connection"] = "Close"
-            }
+            this.headers["Connection"] = "close"
         }
     }
 
@@ -38,9 +32,8 @@ object HttpServerThread : Runnable, AutoCloseable {
         while (true) {
             try {
                 val clientSocket = serverSocket.accept()
-                val id = TODO("Some kind if unique ID for connections")
-                Logger.info("New client has connected - assigned Id $id")
-
+                clientSocket.soTimeout = AppConfig.CONNECTION_TIMEOUT
+                Logger.info("New client has connected - ${clientSocket.inetAddress}")
                 clientCollection.add(
                     Client(clientSocket) {
                         Logger.info("Client $it has disconnected")
@@ -48,20 +41,16 @@ object HttpServerThread : Runnable, AutoCloseable {
                     }
                 )
             } catch (e: Exception) {
-                when (e) {
-                    is SocketException -> {
-                        this.close()
-                    }
+                if (e !is SocketException) {
+                    e.printStackTrace()
                 }
             }
         }
     }
 
-    override fun close() {
-        this.isClosed = true
-    }
+    override fun close() = this.serverSocket.close()
 
-    class SettingsUpdater {
+    object SettingsUpdater {
         fun get(path: String, action: HttpAction) {
             Logger.debug("Adding new GET handler for path $path")
             requestHandlers[HttpMethodType.GET.ordinal][path] = action
