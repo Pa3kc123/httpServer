@@ -17,11 +17,12 @@ interface HttpMessage {
 data class HttpRequest(
     var method: HttpMethodType = HttpMethodType.GET,
     var path: String = "index.html",
+    var query: String? = null,
     var protocol: String = DEFAULT_HTTP_PROTOCOL,
     override var headers: MutableMap<String, String> = HashMap(),
     override var body: String? = null,
 ) : HttpMessage {
-    override fun statusLine() = "$method $path $protocol"
+    override fun statusLine() = "$method $path${ if (query != null) "?$query" else ""} $protocol"
 
     override fun parse() = buildString {
         append("${statusLine()}$HTTP_LINE_BREAK")
@@ -37,15 +38,12 @@ data class HttpRequest(
     }
 
     override fun toString() = buildString {
-        append("$method $path $protocol\\r\\n${System.lineSeparator()}")
+        append("${statusLine()}\\r\\n${System.lineSeparator()}")
 
-        headers.onEachIndexed { index, (key, value) ->
-            append("$key: $value\\r\\n${System.lineSeparator()}")
-
-            if (index == headers.size - 1) {
-                append("\\r\\n${System.lineSeparator()}")
-            }
+        for (key in headers.keys) {
+            append("$key: ${headers[key]}\\r\\n${System.lineSeparator()}")
         }
+        append("\\r\\n${System.lineSeparator()}")
 
         if (body != null) {
             append(body)
@@ -76,15 +74,12 @@ data class HttpResponse(
     }
 
     override fun toString() = buildString {
-        append("$protocol $statusCode $reasonPhrase\\r\\n${System.lineSeparator()}")
+        append("${statusLine()}\\r\\n${System.lineSeparator()}")
 
-        headers.onEachIndexed { index, (key, value) ->
-            append("$key: $value\\r\\n${System.lineSeparator()}")
-
-            if (index == headers.size - 1) {
-                append("\\r\\n${System.lineSeparator()}")
-            }
+        for (key in headers.keys) {
+            append("$key: ${headers[key]}\\r\\n${System.lineSeparator()}")
         }
+        append("\\r\\n${System.lineSeparator()}")
 
         if (body != null) {
             append(body)
@@ -109,14 +104,18 @@ fun newHttpRequest(bytes: ByteArray, offset: Int = 0, length: Int = bytes.size):
 
     val method: HttpMethodType
     val path: String
+    val query: String?
     val protocol: String
     val headers = HashMap<String, String>()
 
     headData.split(HTTP_LINE_BREAK).also { headerLines ->
-        headerLines[0].split(Regex("\\s"), limit = 3).also {
-            method = HttpMethodType.valueOf(it[0])
-            path = it[1]
-            protocol = it[2]
+        headerLines[0].split(Regex("\\s"), limit = 3).also { statusParams ->
+            method = HttpMethodType.valueOf(statusParams[0])
+            statusParams[1].split('?', limit = 2).also {
+                path = it[0]
+                query = if (it.size > 1) it[1] else null
+            }
+            protocol = statusParams[2]
         }
 
         for (i in 1 until headerLines.size) {
@@ -126,5 +125,5 @@ fun newHttpRequest(bytes: ByteArray, offset: Int = 0, length: Int = bytes.size):
         }
     }
 
-    return HttpRequest(method, path, protocol, headers, body)
+    return HttpRequest(method, path, query, protocol, headers, body)
 }
