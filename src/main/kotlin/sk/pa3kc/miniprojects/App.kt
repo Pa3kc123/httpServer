@@ -17,12 +17,14 @@ fun main(args: Array<String>) {
     }
 
     HttpServerThread.settings {
+        this.defaults {
+            headers["Connection"] = "close"
+        }
+
         this.get("/roots") { _, res ->
-            res.headers["Connection"] = "close"
             res.body = "<h1>Hello World!</h1>"
         }
         this.post("/api/roots") { _, res ->
-            res.headers["Connection"] = "close"
             res.body = "<h1>This is hidden hello world message</h1>"
         }
     }

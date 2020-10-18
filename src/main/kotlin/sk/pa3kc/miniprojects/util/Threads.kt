@@ -7,6 +7,8 @@ import java.lang.Exception
 import java.net.SocketException
 import java.net.SocketTimeoutException
 
+fun backgroundJob(job: () -> Unit) = Thread(job).start()
+
 class InputStreamThread(
     private val inputStream: InputStream,
     private val bufferSize: Int = 4096,
@@ -23,8 +25,6 @@ class InputStreamThread(
         try {
             while (true) {
                 byteCount = this.inputStream.read(buffer)
-
-                println(String(buffer, 0, byteCount, Charsets.UTF_8).replace("\r\n", "\\r\\n\r\n"))
 
                 if (byteCount == -1) break
 

@@ -1,8 +1,12 @@
 package sk.pa3kc.miniprojects.data
 
 enum class HttpStatusCode(val code: Int) {
-    //1xx informational response
-    //An informational response indicates that the request was received and understood. It is issued on a provisional basis while request processing continues. It alerts the client to wait for a final response. The message consists only of the status line and optional header fields, and is terminated by an empty line. As the HTTP/1.0 standard did not define any 1xx status codes, servers must not[note 1] send a 1xx response to an HTTP/1.0 compliant client except under experimental conditions.
+    //? 1xx informational response
+    //? An informational response indicates that the request was received and understood.
+    //? It is issued on a provisional basis while request processing continues.
+    //? It alerts the client to wait for a final response.
+    //? The message consists only of the status line and optional header fields, and is terminated by an empty line.
+    //? As the HTTP/1.0 standard did not define any 1xx status codes, servers MUST NOT send a 1xx response to an HTTP/1.0 compliant client except under experimental conditions.
 
     //The server has received the request headers and the client should proceed to send the request body (in the case of a request for which a body needs to be sent; for example, a POST request). Sending a large request body to a server after a request has been rejected for inappropriate headers would be inefficient. To have a server check the request's headers, a client must send Expect: 100-continue as a header in its initial request and receive a Continue status code in response before sending the body. If the client receives an error code such as 403 (Forbidden) or 405 (Method Not Allowed) then it shouldn't send the request's body. The response 417 Expectation Failed indicates that the request should be repeated without the Expect header as it indicates that the server doesn't support expectations (this is the case, for example, of HTTP/1.0 servers)
     CONTINUE(100),
@@ -13,8 +17,8 @@ enum class HttpStatusCode(val code: Int) {
     //Used to return some response headers before final HTTP message.
     EARLY_HINTS(103),
 
-    //2xx success
-    //This class of status codes indicates the action requested by the client was received, understood, and accepted.
+    //? 2xx success
+    //? This class of status codes indicates the action requested by the client was received, understood, and accepted.
 
     //Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request, the response will contain an entity describing or containing the result of the action.
     OK(200),
@@ -37,9 +41,13 @@ enum class HttpStatusCode(val code: Int) {
     //The server has fulfilled a request for the resource, and the response is a representation of the result of one or more instance-manipulations applied to the current instance.
     IM_USED(226),
 
-    //3xx redirection
-    //This class of status code indicates the client must take additional action to complete the request. Many of these status codes are used in URL redirection.
-    //A user agent may carry out the additional action with no user interaction only if the method used in the second request is GET or HEAD. A user agent may automatically redirect a request. A user agent should detect and intervene to prevent cyclical redirects.
+    //? 3xx redirection
+    //? This class of status code indicates the client must take additional action to complete the request.
+    //? Many of these status codes are used in URL redirection.
+    //
+    //? A user agent MAY carry out the additional action with no user interaction only if the method used in the second request is GET or HEAD.
+    //? A user agent MAY automatically redirect a request.
+    //? A user agent SHOULD detect and intervene to prevent cyclical redirects.
 
     //Indicates multiple options for the resource from which the client may choose (via agent-driven content negotiation). For example, this code could be used to present multiple video format options, to list files with different filename extensions, or to suggest word-sense disambiguation.
     MULTIPLE_CHOICES(300),
@@ -60,8 +68,10 @@ enum class HttpStatusCode(val code: Int) {
     //The request and all future requests should be repeated using another URI. and 308 parallel the behaviors of 302 and 301, but do not allow the HTTP method to change. So, for example, submitting a form to a permanently redirected resource may continue smoothly.
     PERMANENT_REDIRECT(308),
 
-    //4xx client errors
-    //This class of status code is intended for situations in which the error seems to have been caused by the client. Except when responding to a HEAD request, the server should include an entity containing an explanation of the error situation, and whether it is a temporary or permanent condition. These status codes are applicable to any request method. User agents should display any included entity to the user.
+    //? 4xx client errors
+    //? This class of status code is intended for situations in which the error seems to have been caused by the client.
+    //? Except when responding to a HEAD request, the server should include an entity containing an explanation of the error situation, and whether it is a temporary or permanent condition.
+    //? These status codes are applicable to any request method. User agents should display any included entity to the user.
 
     //The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing).
     BAD_REQUEST(400),
@@ -123,9 +133,13 @@ enum class HttpStatusCode(val code: Int) {
     //A server operator has received a legal demand to deny access to a resource or to a set of resources that includes the requested resource. The code was chosen as a reference to the novel Fahrenheit 451 (see the Acknowledgements in the RFC).
     UNAVAILABLE_FOR_LEGAL_REASONS(451),
 
-    //5xx server errors
-    //The server failed to fulfill a request.
-    //Response status codes beginning with the digit "5" indicate cases in which the server is aware that it has encountered an error or is otherwise incapable of performing the request. Except when responding to a HEAD request, the server should include an entity containing an explanation of the error situation, and indicate whether it is a temporary or permanent condition. Likewise, user agents should display any included entity to the user. These response codes are applicable to any request method.
+    //? 5xx server errors
+    //? The server failed to fulfill a request.
+    //
+    //? These response status codes indicate cases in which the server is aware that it has encountered an error or is otherwise incapable of performing the request.
+    //? Except when responding to a HEAD request, the server should include an entity containing an explanation of the error situation, and indicate whether it is a temporary or permanent condition.
+    //? Likewise, user agents should display any included entity to the user.
+    //? These response codes are applicable to any request method.
 
     //A generic error message, given when an unexpected condition was encountered and no more specific message is suitable.
     INTERNAL_SERVER_ERROR(500),
@@ -150,12 +164,13 @@ enum class HttpStatusCode(val code: Int) {
     //The client needs to authenticate to gain network access. Intended for use by intercepting proxies used to control access to the network (e.g., "captive portals" used to require agreement to Terms of Service before granting full Internet access via a Wi-Fi hotspot).
     NETWORK_AUTHENTICATION_REQUIRED(511),
 
-    //Unofficial codes
-    //The following codes are not specified by any standard.
+    //? Unofficial codes
+    //? The following codes are not specified by any standard.
 
     //Used in the resumable requests proposal to resume aborted PUT or POST requests.
     CHECKPOINT(103),
-    //Used as a catch-all error condition for allowing response bodies to flow through Apache when ProxyErrorOverride is enabled. When ProxyErrorOverride is enabled in Apache, response bodies that contain a status code of 4xx or 5xx are automatically discarded by Apache in favor of a generic response or a custom response specified by the ErrorDocument directive.
+    //Used as a catch-all error condition for allowing response bodies to flow through Apache when ProxyErrorOverride is enabled.
+    //When ProxyErrorOverride is enabled in Apache, response bodies that contain a status code of 4xx or 5xx are automatically discarded by Apache in favor of a generic response or a custom response specified by the ErrorDocument directive.
     THIS_IS_FINE(218),
     //Used by the Laravel Framework when a CSRF Token is missing or expired.
     PAGE_EXPIRED(419),
@@ -182,8 +197,8 @@ enum class HttpStatusCode(val code: Int) {
     //Used by some HTTP proxies to signal a network read timeout behind the proxy to a client in front of the proxy.
     NETWORK_READ_TIMEOUT_ERROR(598),
 
-    //Internet Information Services
-    //Microsoft's Internet Information Services (IIS) web server expands the 4xx error space to signal errors with the client's request.
+    //? Internet Information Services
+    //? Microsoft's Internet Information Services (IIS) web server expands the 4xx error space to signal errors with the client's request.
 
     //The client's session has expired and must log in again.
     LOGIN_TIME_OUT(440),
@@ -192,10 +207,10 @@ enum class HttpStatusCode(val code: Int) {
     //Used in Exchange ActiveSync when either a more efficient server is available or the server cannot access the users' mailbox. The client is expected to re-run the HTTP AutoDiscover operation to find a more appropriate server.
     REDIRECT(451),
 
-    //IIS sometimes uses additional decimal sub-codes for more specific information, however these sub-codes only appear in the response payload and in documentation, not in the place of an actual HTTP status code.
+    //? IIS sometimes uses additional decimal sub-codes for more specific information, however these sub-codes only appear in the response payload and in documentation, not in the place of an actual HTTP status code.
 
-    //nginx
-    //The nginx web server software expands the 4xx error space to signal issues with the client's request.
+    //? nginx
+    //? The nginx web server software expands the 4xx error space to signal issues with the client's request.
 
     //Used internally to instruct the server to return no information to the client and close the connection immediately.
     NO_RESPONSE(444),
@@ -210,8 +225,8 @@ enum class HttpStatusCode(val code: Int) {
     //Used when the client has closed the request before the server could send a response.
     CLIENT_CLOSED_REQUEST(499),
 
-    //Cloudflare
-    //Cloudflare's reverse proxy service expands the 5xx series of errors space to signal issues with the origin server.
+    //? Cloudflare
+    //? Cloudflare's reverse proxy service expands the 5xx series of errors space to signal issues with the origin server.
 
     //The origin server returned an empty, unknown, or unexplained response to Cloudflare.
     WEB_SERVER_RETURNED_AN_UNKNOWN_ERROR(520),
@@ -232,8 +247,8 @@ enum class HttpStatusCode(val code: Int) {
     //Error is returned along with a 1xxx error.
     UNKNOWN1(530),
 
-    //AWS Elastic Load Balancer
-    //Amazon's Elastic Load Balancing adds a few custom 4xx return codes
+    //? AWS Elastic Load Balancer
+    //? Amazon's Elastic Load Balancing adds a few custom 4xx return codes
 
     //Client closed the connection with the load balancer before the idle timeout period elapsed. Typically when client timeout is sooner than the Elastic Load Balancer's timeout.
     UNKNOWN2(460),
