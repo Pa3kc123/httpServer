@@ -15,11 +15,13 @@ abstract class HttpHead(
     protected val type: HttpHeadType,
     val headers: MutableMap<String, String>
 ) {
-    abstract fun statusLine(): String
+    abstract val statusLine: String
 }
 
 abstract class HttpMessage {
     abstract val head: HttpHead
+    open val statusLine: String
+        get() = this.head.statusLine
     var hasBody = false
     var body: String
         get() = this.bodyBuilder?.toString() ?: ""
@@ -27,7 +29,6 @@ abstract class HttpMessage {
 
     private var bodyBuilder: StringBuilder? = null
 
-    open fun statusLine(): String = head.statusLine()
     open fun onBodyContentChanged(content: String) {
         if (this.bodyBuilder == null) {
             this.bodyBuilder = StringBuilder()

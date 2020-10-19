@@ -23,7 +23,7 @@ object HttpServerThread : Runnable, AutoCloseable {
         while (true) {
             try {
                 val client = this.serverSocket.accept()
-                val addr = client.localAddress
+                val addr = client.inetAddress
 
                 if (clientCounter < AppConfig.MAX_ALLOWED_CONNECTIONS) {
                     Logger.info("$addr has connected")
@@ -44,22 +44,22 @@ object HttpServerThread : Runnable, AutoCloseable {
     }
 
     override fun close() = this.serverSocket.close()
+}
 
-    object SettingsUpdater {
-        fun defaults(block: DefaultHttpResponseHead.() -> Unit) {
-            Logger.debug("Setting new defaults")
-            DefaultHttpResponseHead.apply(block)
-        }
+object SettingsUpdater {
+    fun defaults(block: DefaultHttpResponseHead.() -> Unit) {
+        Logger.debug("Setting new defaults")
+        DefaultHttpResponseHead.apply(block)
+    }
 
-        fun get(path: String, action: HttpAction) {
-            Logger.debug("Adding new GET handler for path $path")
-            RequestHandlerCollection["GET"][path] = action
-        }
+    fun get(path: String, action: HttpAction) {
+        Logger.debug("Adding new GET handler for path $path")
+        RequestHandlerCollection["GET"][path] = action
+    }
 
-        fun post(path: String, action: HttpAction) {
-            Logger.debug("Adding new POST handler for path $path")
-            RequestHandlerCollection["POST"][path] = action
-        }
+    fun post(path: String, action: HttpAction) {
+        Logger.debug("Adding new POST handler for path $path")
+        RequestHandlerCollection["POST"][path] = action
     }
 }
 

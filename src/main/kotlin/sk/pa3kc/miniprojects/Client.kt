@@ -72,16 +72,22 @@ fun handleClient(socket: Socket, finally: (() -> Unit)? = null) = backgroundJob 
                 while (true) {
                     byteCount = sis.read(buffer)
 
+                    if (byteCount == -1) break
+
                     val reqCheck = httpRequestBuilder.append(String(buffer, 0, byteCount, Charsets.UTF_8))
 
-                    if (byteCount == -1 || reqCheck) break
+                    if (reqCheck) break
                 }
             } catch (e: Exception) {
                 when (e) {
-                    is SocketTimeoutException -> Logger.info("$sInetAddress - timed out")
-                    is SocketException -> Logger.warn("$sInetAddress - socket is closed")
+                    is SocketTimeoutException -> Logger.info("$sInetAddress has timed out")
+                    is SocketException -> Logger.warn("$sInetAddress socket is closed")
                     else -> e.printStackTrace()
                 }
+                return@use
+            }
+
+            if (httpRequestBuilder.isEmpty()) {
                 return@use
             }
 

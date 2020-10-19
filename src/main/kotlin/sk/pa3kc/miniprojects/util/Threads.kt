@@ -1,7 +1,6 @@
 package sk.pa3kc.miniprojects.util
 
 import java.io.Closeable
-import java.io.IOException
 import java.io.InputStream
 import java.lang.Exception
 import java.net.SocketException

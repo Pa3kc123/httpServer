@@ -21,11 +21,8 @@ fun main(args: Array<String>) {
             headers["Connection"] = "close"
         }
 
-        this.get("/roots") { _, res ->
-            res.body = "<h1>Hello World!</h1>"
-        }
-        this.post("/api/roots") { _, res ->
-            res.body = "<h1>This is hidden hello world message</h1>"
+        this.get("/site1") { _, res ->
+            res.body = File("classes/web/site1/index.html").readText()
         }
     }
 }

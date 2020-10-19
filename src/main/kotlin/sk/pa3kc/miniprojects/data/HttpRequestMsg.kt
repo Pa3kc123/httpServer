@@ -11,7 +11,8 @@ class HttpRequestHead(
     var protocol: String = DEFAULT_HTTP_PROTOCOL,
     headers: MutableMap<String, String>
 ) : HttpHead(HttpHeadType.REQUEST, headers) {
-    override fun statusLine() = "$method $path${if (query != null) "?$query" else ""} $protocol"
+    override val statusLine: String
+        get() = "$method $path${if (query != null) "?$query" else ""} $protocol"
 
     companion object {
         fun parse(httpHead: String): HttpRequestHead {
@@ -46,10 +47,11 @@ class HttpRequestHead(
 data class HttpRequest(
     override val head: HttpRequestHead
 ) : HttpMessage() {
-    override fun statusLine() = this.head.statusLine()
+    override val statusLine: String
+        get() = this.head.statusLine
 
     override fun toHttpString() = buildString {
-        append("${statusLine()}$HTTP_LINE_BREAK")
+        append("$statusLine$HTTP_LINE_BREAK")
 
         val headers = this@HttpRequest.head.headers
         for (key in headers.keys) {
@@ -63,7 +65,7 @@ data class HttpRequest(
     }
 
     override fun toString() = buildString {
-        append("${statusLine()}\\r\\n${System.lineSeparator()}")
+        append("$statusLine\\r\\n${System.lineSeparator()}")
 
         val headers = this@HttpRequest.head.headers
         for (key in headers.keys) {
@@ -80,26 +82,26 @@ data class HttpRequest(
         private val builder = StringBuilder()
         private var req: HttpRequest? = null
 
+        fun isEmpty() = this.builder.isEmpty()
+
         /**
          * @return true if valid [HttpRequest] can be build, false otherwise
          */
         fun append(msgChunk: String): Boolean {
-            builder.append(msgChunk)
-
-            val index = msgChunk.indexOf(HTTP_MESSAGE_DIVIDER)
-
-            if (index == -1) return false
-
-            return true
+            this.req?.onBodyContentChanged(msgChunk) ?: builder.append(msgChunk)
+            return msgChunk.indexOf(HTTP_MESSAGE_DIVIDER) != -1
         }
 
         fun build(): HttpRequest {
-            val splits = this.builder.toString().split(HTTP_MESSAGE_DIVIDER, limit = 2)
-            val head = HttpRequestHead.parse(splits[0])
+            if (this.builder.isEmpty()) throw IllegalStateException("Cannot build HttpRequest without request data")
 
-            return HttpRequest(head).also {
-                this@Builder.req = it
-                this@Builder.req!!.onBodyContentChanged(splits[1])
+            this.builder.toString().split(HTTP_MESSAGE_DIVIDER, limit = 2).also { splits ->
+                val head = HttpRequestHead.parse(splits[0])
+
+                return HttpRequest(head).also {
+                    this@Builder.req = it
+                    this@Builder.req!!.onBodyContentChanged(splits[1])
+                }
             }
         }
     }
