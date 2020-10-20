@@ -13,7 +13,7 @@ import java.net.SocketTimeoutException
 fun handleClient(socket: Socket, finally: (() -> Unit)? = null) = backgroundJob {
     socket.use {
         val currTime = System.currentTimeMillis()
-        it.soTimeout = AppConfig.CONNECTION_TIMEOUT
+        it.soTimeout = AppConfig["server.conTimeout"] as Int
 
         val sis = it.getInputStream()
         val sos = it.getOutputStream()

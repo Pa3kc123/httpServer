@@ -1,74 +1,82 @@
 package sk.pa3kc.miniprojects
 
+import sk.pa3kc.miniprojects.util.ImmutableSet
 import sk.pa3kc.miniprojects.util.Logger
 import sk.pa3kc.miniprojects.util.map
 import java.io.FileReader
 import java.util.Properties
+import kotlin.time.seconds
 
-private const val SERVER_PORT_PROP = "server.port"
-private const val MAX_ALLOWED_CONNECTIONS_PROP = "server.maxConnections"
-private const val CONNECTION_TIMEOUT_PROP = "server.conTimeout"
+private const val SERVER_PORT = "server.port"
+private const val MAX_ALLOWED_CONNECTIONS = "server.maxConnections"
+private const val CONNECTION_TIMEOUT = "server.conTimeout"
+private const val SERVER_WEB_DIR = "server.webDir"
 
-object AppConfig {
+data class ConfigMapEntry(override val key: String, override val value: Any) : Map.Entry<String, Any>
+
+fun configSetOf(vararg pairs: Pair<String, Any>) = ImmutableSet(pairs.size) {
+    ConfigMapEntry(pairs[it].first, pairs[it].second)
+}
+
+object AppConfig : AbstractMap<String, Any>() {
+    override val entries: Set<Map.Entry<String, Any>>
+
     var initialized = false
-        private set
-    var SERVER_PORT = 8080
-        private set
-    var MAX_ALLOWED_CONNECTIONS = 16
-        private set
-    var CONNECTION_TIMEOUT = 30000
         private set
 
     init {
+        this.entries = configSetOf(
+            SERVER_PORT to 8080,
+            MAX_ALLOWED_CONNECTIONS to 16,
+            CONNECTION_TIMEOUT to 30000,
+            SERVER_WEB_DIR to "/web"
+        )
+
         try {
             Properties().also { config ->
                 config.load(FileReader(CONFIG_FILE_PATH))
 
-                config.getProperty(SERVER_PORT_PROP).let {
-                    if (it == null) {
-                        Logger.warn("$SERVER_PORT_PROP must be defined")
-                        return@let
-                    }
-
-                    val port = it.toIntOrNull()
-                    if (port == null) {
-                        Logger.warn("$SERVER_PORT_PROP must be a number")
-                    } else {
-                        SERVER_PORT = port.map(0 .. 65535)
-                    }
-                }
-
-                config.getProperty(MAX_ALLOWED_CONNECTIONS_PROP).let {
-                    if (it == null) {
-                        Logger.warn("$MAX_ALLOWED_CONNECTIONS_PROP must be defined")
-                        return@let
-                    }
-
-                    val num = it.toIntOrNull()
-                    if (num == null) {
-                        Logger.warn("$MAX_ALLOWED_CONNECTIONS_PROP must be a number")
-                    } else {
-                        MAX_ALLOWED_CONNECTIONS = num
-                    }
-                }
-
-                config.getProperty(CONNECTION_TIMEOUT_PROP).let {
-                    if (it == null) {
-                        Logger.info("$CONNECTION_TIMEOUT_PROP is not defined")
-                        return@let
-                    }
-
-                    val timeout = it.toIntOrNull()
-                    if (timeout == null) {
-                        Logger.warn("$CONNECTION_TIMEOUT_PROP must be a number")
-                    } else {
-                        CONNECTION_TIMEOUT = timeout
-                    }
-                }
+                config.setInt(SERVER_PORT, (0 .. 65535))
+                config.setInt(MAX_ALLOWED_CONNECTIONS)
+                config.setInt(CONNECTION_TIMEOUT)
+                config.setString(SERVER_WEB_DIR)
             }
+
             this.initialized = true
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
+
+    override operator fun get(key: String): Any? = super.get(key)
+
+    private fun Properties.setInt(propertyName: String, range: IntRange? = null) {
+        val value = this.getProperty(propertyName) ?: run {
+            Logger.warn("$propertyName must be defined")
+            return
+        }
+
+        val result = value.toIntOrNull() ?: run {
+            Logger.warn("$propertyName must be a number")
+            return
+        }
+
+        if (range != null) {
+            result.map(range)
+        } else {
+            result
+        }
+    }
+    private fun Properties.setLong(propertyName: String) {
+        val value = this.getProperty(propertyName) ?: run {
+            Logger.warn("$propertyName must be defined")
+            return
+        }
+
+        value.toLongOrNull() ?: Logger.warn("$propertyName must be a number")
+    }
+    private fun Properties.setString(propertyName: String) {
+        this.getProperty(propertyName) ?: Logger.warn("$propertyName must be defined")
+    }
 }
+

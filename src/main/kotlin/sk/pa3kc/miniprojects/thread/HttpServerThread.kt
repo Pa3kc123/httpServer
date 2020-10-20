@@ -12,7 +12,7 @@ import java.nio.file.FileSystem
 import java.nio.file.FileSystems
 
 object HttpServerThread : Runnable, AutoCloseable {
-    private val serverSocket = ServerSocket(AppConfig.SERVER_PORT)
+    private val serverSocket = ServerSocket(AppConfig["server.port"] as Int)
     private var clientCounter = 0
 
     init {
@@ -28,7 +28,7 @@ object HttpServerThread : Runnable, AutoCloseable {
                 val client = this.serverSocket.accept()
                 val addr = client.inetAddress
 
-                if (clientCounter < AppConfig.MAX_ALLOWED_CONNECTIONS) {
+                if (clientCounter < AppConfig["server.maxConnections"] as Int) {
                     Logger.info("$addr has connected")
                     clientCounter++
                     handleClient(client) {
@@ -109,11 +109,15 @@ object RequestHandlerCollection {
 
     operator fun invoke(req: HttpRequest): HttpResponse {
         val res = HttpResponse(HttpResponseHead())
-        this.map[req.head.method]?.get(req.head.path)?.invoke(req, res) ?: run {
-            res.head.protocol = req.head.protocol
-            res.head.statusCode = 404
-            res.head.reasonPhrase = "NOT FOUND"
-            res.head.headers["Connection"] = "close"
+        this.map[req.head.method]?.get(req.head.path)?.invoke(req, res) ?: File("${System.getProperty("user.dir")}/classes/web", req.head.path).also {
+            if (it.exists()) {
+                req.body = it.readText()
+            } else {
+                res.head.protocol = req.head.protocol
+                res.head.statusCode = 404
+                res.head.reasonPhrase = "NOT FOUND"
+                res.head.headers["Connection"] = "close"
+            }
         }
         return res
     }
