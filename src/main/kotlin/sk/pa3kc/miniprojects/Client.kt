@@ -10,49 +10,6 @@ import java.lang.Exception
 import java.net.SocketException
 import java.net.SocketTimeoutException
 
-/*
-@Suppress("EqualsOrHashCode")
-class Client(
-    private val socket: Socket,
-    private val onClose: (Client) -> Unit
-) {
-//    private val ist: InputStreamThread
-    private val sis = this.socket.getInputStream()
-    private val sos = this.socket.getOutputStream()
-
-    private val data = ArrayList<Byte>()
-
-    init {
-//        this.ist = InputStreamThread(this.socket.getInputStream(), 4096, ::onBytesReceived)
-    }
-
-    fun onBytesReceived(bytes: ByteArray, byteCount: Int) {
-        for (i in 0 until byteCount) {
-            this.data.add(bytes[i])
-        }
-
-//        if (bytes.compareRangeFromEnd(byteCount, DELIMITER_CHECK)) {
-//            onHttpRequest(newHttpRequest(this.data.toByteArray()))
-//        }
-    }
-
-    fun onHttpRequest(request: HttpRequest) {
-        println(request)
-
-        val last = System.currentTimeMillis()
-        val res = HttpServerThread.onHandle(request)
-        res.headers["Server-Timing"] = "handle;dur=${System.currentTimeMillis() - last}"
-
-        //TODO: Fix to not send everything in single packet
-        this.sos.write(res.parse().toByteArray(Charsets.UTF_8))
-
-        this.socket.close()
-    }
-
-    override fun toString() = this.socket.inetAddress.toString()
-}
-*/
-
 fun handleClient(socket: Socket, finally: (() -> Unit)? = null) = backgroundJob {
     socket.use {
         val currTime = System.currentTimeMillis()
@@ -74,7 +31,7 @@ fun handleClient(socket: Socket, finally: (() -> Unit)? = null) = backgroundJob 
 
                     if (byteCount == -1) break
 
-                    val reqCheck = httpRequestBuilder.append(String(buffer, 0, byteCount, Charsets.UTF_8))
+                    val reqCheck = httpRequestBuilder.append(String(buffer, 0, byteCount, Charsets.US_ASCII))
 
                     if (reqCheck) break
                 }

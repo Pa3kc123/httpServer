@@ -4,9 +4,12 @@ import sk.pa3kc.miniprojects.AppConfig
 import sk.pa3kc.miniprojects.data.*
 import sk.pa3kc.miniprojects.handleClient
 import sk.pa3kc.miniprojects.util.Logger
+import java.io.File
 import java.lang.Exception
 import java.net.ServerSocket
 import java.net.SocketException
+import java.nio.file.FileSystem
+import java.nio.file.FileSystems
 
 object HttpServerThread : Runnable, AutoCloseable {
     private val serverSocket = ServerSocket(AppConfig.SERVER_PORT)
@@ -50,6 +53,28 @@ object SettingsUpdater {
     fun defaults(block: DefaultHttpResponseHead.() -> Unit) {
         Logger.debug("Setting new defaults")
         DefaultHttpResponseHead.apply(block)
+    }
+
+    fun static(name: String) {
+        File("${System.getProperty("user.dir")}/classes/web", name).let {
+            Logger.debug("Trying to register site on path ${it.absolutePath}")
+            if (!it.exists()) {
+                Logger.warn("Failed to add static response handler - directory called \"$name\" doesn't exist")
+                return
+            }
+            if (it.isFile) {
+                Logger.warn("Failed to add static response handler - directory doesn't exist")
+                return
+            }
+
+            it.list()!!.forEach { entry ->
+                if (entry == "index.html") {
+
+                }
+            }
+
+            TODO("Search for index file in site directory and make static directory handler")
+        }
     }
 
     fun get(path: String, action: HttpAction) {

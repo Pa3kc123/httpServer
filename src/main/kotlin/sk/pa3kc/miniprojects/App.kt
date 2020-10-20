@@ -21,8 +21,6 @@ fun main(args: Array<String>) {
             headers["Connection"] = "close"
         }
 
-        this.get("/site1") { _, res ->
-            res.body = File("classes/web/site1/index.html").readText()
-        }
+        this.static("site1")
     }
 }
