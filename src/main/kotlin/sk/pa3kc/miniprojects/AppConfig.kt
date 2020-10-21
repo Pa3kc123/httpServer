@@ -7,10 +7,14 @@ import java.io.FileReader
 import java.util.Properties
 import kotlin.time.seconds
 
-private const val SERVER_PORT = "server.port"
-private const val MAX_ALLOWED_CONNECTIONS = "server.maxConnections"
-private const val CONNECTION_TIMEOUT = "server.conTimeout"
-private const val SERVER_WEB_DIR = "server.webDir"
+enum class PropertyName(val propName: String) {
+    SERVER_PORT("server.port"),
+    MAX_ALLOWED_CONNECTIONS("server.maxConnections"),
+    CONNECTION_TIMEOUT("server.conTimeout"),
+    SERVER_WEB_DIR("server.webDir");
+
+    override fun toString() = super.name
+}
 
 data class ConfigMapEntry(override val key: String, override val value: Any) : Map.Entry<String, Any>
 
@@ -18,9 +22,9 @@ fun configSetOf(vararg pairs: Pair<String, Any>) = ImmutableSet(pairs.size) {
     ConfigMapEntry(pairs[it].first, pairs[it].second)
 }
 
-object AppConfig : AbstractMap<String, Any>() {
-    override val entries: Set<Map.Entry<String, Any>>
-
+data class AppConfig(
+    override val entries: Set<Map.Entry<PropertyName, Any>>
+) : AbstractMap<PropertyName, Any>() {
     var initialized = false
         private set
 
@@ -77,6 +81,12 @@ object AppConfig : AbstractMap<String, Any>() {
     }
     private fun Properties.setString(propertyName: String) {
         this.getProperty(propertyName) ?: Logger.warn("$propertyName must be defined")
+    }
+
+    class Builder {
+        fun fromProperties(config: Properties): AppConfig {
+
+        }
     }
 }
 
