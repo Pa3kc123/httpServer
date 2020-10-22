@@ -14,14 +14,10 @@ enum class HttpHeadType {
 abstract class HttpHead(
     protected val type: HttpHeadType,
     val headers: MutableMap<String, String>
-) {
-    abstract val statusLine: String
-}
+)
 
 abstract class HttpMessage {
     abstract val head: HttpHead
-    open val statusLine: String
-        get() = this.head.statusLine
     var hasBody = false
     var body: String
         get() = this.bodyBuilder?.toString() ?: ""

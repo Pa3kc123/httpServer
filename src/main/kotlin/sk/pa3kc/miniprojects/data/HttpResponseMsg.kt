@@ -19,7 +19,7 @@ class HttpResponseHead(
     var reasonPhrase: String = DefaultHttpResponseHead.reasonPhrase,
     headers: MutableMap<String, String> = DefaultHttpResponseHead.headers
 ) : HttpHead(HttpHeadType.RESPONSE, headers) {
-    override val statusLine: String
+    val statusLine: String
         get() = "$protocol $statusCode $reasonPhrase"
 
     companion object {
@@ -56,7 +56,7 @@ class HttpResponseHead(
 data class HttpResponse(
     override val head: HttpResponseHead
 ) : HttpMessage() {
-    override val statusLine: String
+    val statusLine: String
         get() = this.head.statusLine
 
     override fun toHttpString() = buildString {

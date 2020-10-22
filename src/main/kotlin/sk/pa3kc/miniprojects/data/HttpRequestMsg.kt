@@ -11,7 +11,7 @@ class HttpRequestHead(
     var protocol: String = DEFAULT_HTTP_PROTOCOL,
     headers: MutableMap<String, String>
 ) : HttpHead(HttpHeadType.REQUEST, headers) {
-    override val statusLine: String
+    val requestLine: String
         get() = "$method $path${if (query != null) "?$query" else ""} $protocol"
 
     companion object {
@@ -47,11 +47,11 @@ class HttpRequestHead(
 data class HttpRequest(
     override val head: HttpRequestHead
 ) : HttpMessage() {
-    override val statusLine: String
-        get() = this.head.statusLine
+    val requestLine: String
+        get() = this.head.requestLine
 
     override fun toHttpString() = buildString {
-        append("$statusLine$HTTP_LINE_BREAK")
+        append("$requestLine$HTTP_LINE_BREAK")
 
         val headers = this@HttpRequest.head.headers
         for (key in headers.keys) {
@@ -65,7 +65,7 @@ data class HttpRequest(
     }
 
     override fun toString() = buildString {
-        append("$statusLine\\r\\n${System.lineSeparator()}")
+        append("$requestLine\\r\\n${System.lineSeparator()}")
 
         val headers = this@HttpRequest.head.headers
         for (key in headers.keys) {

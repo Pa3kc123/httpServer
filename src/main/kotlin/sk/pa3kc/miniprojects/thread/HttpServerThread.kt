@@ -12,7 +12,7 @@ import java.nio.file.FileSystem
 import java.nio.file.FileSystems
 
 object HttpServerThread : Runnable, AutoCloseable {
-    private val serverSocket = ServerSocket(AppConfig["server.port"] as Int)
+    private val serverSocket = ServerSocket() // ServerSocket(AppConfig["server.port"] as Int)
     private var clientCounter = 0
 
     init {
@@ -28,7 +28,8 @@ object HttpServerThread : Runnable, AutoCloseable {
                 val client = this.serverSocket.accept()
                 val addr = client.inetAddress
 
-                if (clientCounter < AppConfig["server.maxConnections"] as Int) {
+//                if (clientCounter < AppConfig["server.maxConnections"] as Int) {
+                if (clientCounter < -1) {
                     Logger.info("$addr has connected")
                     clientCounter++
                     handleClient(client) {

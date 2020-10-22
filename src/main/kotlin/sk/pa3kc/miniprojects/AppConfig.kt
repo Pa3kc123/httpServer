@@ -4,7 +4,8 @@ import sk.pa3kc.miniprojects.util.ImmutableSet
 import sk.pa3kc.miniprojects.util.Logger
 import sk.pa3kc.miniprojects.util.map
 import java.io.FileReader
-import java.util.Properties
+import java.util.*
+import kotlin.collections.AbstractMap
 import kotlin.time.seconds
 
 enum class PropertyName(val propName: String) {
@@ -16,77 +17,56 @@ enum class PropertyName(val propName: String) {
     override fun toString() = super.name
 }
 
-data class ConfigMapEntry(override val key: String, override val value: Any) : Map.Entry<String, Any>
+data class ConfigMapEntry(override val key: PropertyName, override val value: Any) : Map.Entry<PropertyName, Any>
 
-fun configSetOf(vararg pairs: Pair<String, Any>) = ImmutableSet(pairs.size) {
+fun configSetOf(vararg pairs: Pair<PropertyName, Any>) = ImmutableSet(pairs.size) {
     ConfigMapEntry(pairs[it].first, pairs[it].second)
 }
 
-data class AppConfig(
+data class Configuration(
     override val entries: Set<Map.Entry<PropertyName, Any>>
 ) : AbstractMap<PropertyName, Any>() {
-    var initialized = false
-        private set
-
-    init {
-        this.entries = configSetOf(
-            SERVER_PORT to 8080,
-            MAX_ALLOWED_CONNECTIONS to 16,
-            CONNECTION_TIMEOUT to 30000,
-            SERVER_WEB_DIR to "/web"
-        )
-
-        try {
-            Properties().also { config ->
-                config.load(FileReader(CONFIG_FILE_PATH))
-
-                config.setInt(SERVER_PORT, (0 .. 65535))
-                config.setInt(MAX_ALLOWED_CONNECTIONS)
-                config.setInt(CONNECTION_TIMEOUT)
-                config.setString(SERVER_WEB_DIR)
-            }
-
-            this.initialized = true
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    override operator fun get(key: String): Any? = super.get(key)
-
-    private fun Properties.setInt(propertyName: String, range: IntRange? = null) {
-        val value = this.getProperty(propertyName) ?: run {
-            Logger.warn("$propertyName must be defined")
-            return
-        }
-
-        val result = value.toIntOrNull() ?: run {
-            Logger.warn("$propertyName must be a number")
-            return
-        }
-
-        if (range != null) {
-            result.map(range)
-        } else {
-            result
-        }
-    }
-    private fun Properties.setLong(propertyName: String) {
-        val value = this.getProperty(propertyName) ?: run {
-            Logger.warn("$propertyName must be defined")
-            return
-        }
-
-        value.toLongOrNull() ?: Logger.warn("$propertyName must be a number")
-    }
-    private fun Properties.setString(propertyName: String) {
-        this.getProperty(propertyName) ?: Logger.warn("$propertyName must be defined")
-    }
-
     class Builder {
-        fun fromProperties(config: Properties): AppConfig {
-
-        }
+        fun fromProperties(config: Properties) = Configuration(configSetOf(
+            PropertyName.SERVER_PORT to config.getInt(PropertyName.SERVER_PORT, 8080, (0 .. 65535)),
+            PropertyName.MAX_ALLOWED_CONNECTIONS to config.getInt(PropertyName.MAX_ALLOWED_CONNECTIONS, 16),
+            PropertyName.CONNECTION_TIMEOUT to config.getInt(PropertyName.CONNECTION_TIMEOUT, 30000),
+            PropertyName.SERVER_WEB_DIR to config.getString(PropertyName.SERVER_WEB_DIR, "/web")
+        ))
     }
 }
 
+private fun Properties.getInt(propertyName: PropertyName, default: Int, range: IntRange? = null): Int {
+    val value = this.getProperty(propertyName.propName) ?: run {
+        Logger.warn("$propertyName must be defined")
+        return default
+    }
+
+    val result = value.toIntOrNull() ?: run {
+        Logger.warn("$propertyName must be a number")
+        return default
+    }
+
+    return if (range != null) {
+        result.map(range)
+    } else {
+        result
+    }
+}
+private fun Properties.getLong(propertyName: PropertyName, default: Long): Long{
+    val value = this.getProperty(propertyName.propName) ?: run {
+        Logger.warn("$propertyName must be defined")
+        return default
+    }
+
+    return value.toLongOrNull() ?: run {
+        Logger.warn("$propertyName must be a number")
+        return default
+    }
+}
+private fun Properties.getString(propertyName: PropertyName, default: String): String {
+    return this.getProperty(propertyName.propName) ?: run {
+        Logger.warn("$propertyName must be defined")
+        return default
+    }
+}
