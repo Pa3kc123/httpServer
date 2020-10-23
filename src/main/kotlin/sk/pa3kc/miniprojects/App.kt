@@ -2,16 +2,10 @@ package sk.pa3kc.miniprojects
 
 import sk.pa3kc.miniprojects.thread.HttpServerThread
 import sk.pa3kc.miniprojects.util.Buildable
-import sk.pa3kc.miniprojects.util.ImmutableSet
 import sk.pa3kc.miniprojects.util.loadConfig
 import java.io.File
 import java.io.FileReader
 import java.util.*
-import kotlin.collections.HashMap
-import kotlin.reflect.KClass
-import kotlin.reflect.KType
-import kotlin.reflect.full.*
-import kotlin.reflect.typeOf
 import kotlin.system.exitProcess
 
 data class Root(
@@ -41,17 +35,20 @@ data class Server(
 }
 
 object AppConfig {
-    private val root: Server
+    private val root: Root
+    val server: Server
+        get() = this.root.server
 
     init {
         Properties().also { config ->
             config.load(FileReader(CONFIG_FILE_PATH))
-            root = loadConfig(config, Server::class) ?: throw IllegalStateException("Failed to load config file")
+            root = loadConfig(config, Root::class) ?: throw IllegalStateException("Failed to load config file")
         }
     }
 }
 
 fun main(args: Array<String>) {
+    AppConfig
     exitProcess(0)
 
     with(File(CSV_DIR_PATH)) {
