@@ -1,5 +1,6 @@
 package sk.pa3kc.miniprojects.util
 
+import java.lang.reflect.ParameterizedType
 import java.util.*
 import kotlin.reflect.*
 import kotlin.reflect.full.*
@@ -20,9 +21,9 @@ private val KT_FLOAT_ARRAY = FloatArray::class.createType()
 private val KT_DOUBLE_ARRAY = DoubleArray::class.createType()
 
 private val KT_STRING = String::class.createType()
-private val KT_ARRAY = Array::class.createType(
-    arguments = listOf(KTypeProjection(KVariance.INVARIANT, Any::class.createType()))
-)
+
+private val KT_BUILDABLE = Buildable::class.createType()
+private val KT_BUILDER = Buildable.Builder::class.createType(listOf(KTypeProjection.STAR))
 
 interface Buildable {
     abstract class Builder<T> {
@@ -40,65 +41,91 @@ private fun <T : Buildable> getBuilderClass(cls: KClass<T>): KClass<Buildable.Bu
     throw IllegalArgumentException("${cls.qualifiedName} does not contain Builder class")
 }
 
-private fun <T : Buildable> getBuilderMethod(cls: KClass<Buildable.Builder<T>>): KFunction<T> {
-    for (method in cls.declaredMemberFunctions) {
-        if (method.name == "build") {
-            @Suppress("UNCHECKED_CAST")
-            return method as KFunction<T>
-        }
-    }
-    throw IllegalArgumentException("${cls.qualifiedName} does not contain build method")
-}
-
-fun <T : Buildable> loadConfig(properties: Properties, cls: KClass<T>): T? {
+fun <T : Buildable> loadConfig(properties: Properties, cls: KClass<T>, category: String = ""): T {
     if (!cls.isData) throw IllegalArgumentException("cls must be data class")
 
     val builderClass = getBuilderClass(cls)
     val builderClassInstance = builderClass.createInstance()
-//    val builderMethod = getBuilderMethod(builderClass)
 
     for (property in builderClass.declaredMemberProperties) {
-        if (property.isFinal && property.isConst) {
+        if (property.isConst || !(property.isLateinit || property is KMutableProperty<*>)) {
             continue
         }
 
-//        val prop = properties.getProperty(property.name) ?: continue
-        when(val type = (property as KMutableProperty<*>).returnType) {
-//            KT_BYTE -> property.setter.call(builderClassInstance, prop.toByte())
-//            KT_SHORT -> property.setter.call(builderClassInstance, prop.toShort())
-//            KT_INT -> property.setter.call(builderClassInstance, prop.toInt())
-//            KT_LONG -> property.setter.call(builderClassInstance, prop.toLong())
-//            KT_FLOAT -> property.setter.call(builderClassInstance, prop.toFloat())
-//            KT_DOUBLE -> property.setter.call(builderClassInstance, prop.toDouble())
-//            KT_BYTE_ARRAY -> property.setter.call(builderClassInstance, prop.toByteArray())
-//            KT_SHORT_ARRAY -> property.setter.call(builderClassInstance, prop.toShortArray())
-//            KT_INT_ARRAY -> property.setter.call(builderClassInstance, prop.toIntArray())
-//            KT_LONG_ARRAY -> property.setter.call(builderClassInstance, prop.toLongArray())
-//            KT_FLOAT_ARRAY -> property.setter.call(builderClassInstance, prop.toFloatArray())
-//            KT_DOUBLE_ARRAY -> property.setter.call(builderClassInstance, prop.toDoubleArray())
-//            KT_STRING -> property.setter.call(builderClassInstance, prop)
-            else -> {
-                if ((type.javaType as Class<*>).isArray) {
-                    val splits = arrayOf("") //prop.split(',')
-                    val arrClass = (Array::class.createType(arguments = type.arguments).classifier as KClass<*>)
-                    val arrConstr = arrClass.constructors.first() as (Int, (Int) -> String) -> Array<String>
-                    val arrInstance = arrConstr(splits.size) { splits[it] }
+        val type = (property as KMutableProperty<*>).returnType
 
-                    property.setter.call(builderClassInstance, arrInstance)
-                } else {
-                    val id = 1 // prop.split(',')[0].toInt()
+        if (type.isSubtypeOf(KT_BUILDABLE)) {
+            val innerBuilderClass: KClass<Buildable.Builder<*>>
 
-                    val typeClass = (type.classifier as KClass<*>)
-                    val typeConstr = typeClass.primaryConstructor
-                    val arrInstance = typeConstr?.call(id) ?: continue
+            var tmp: KClass<Buildable.Builder<*>>? = null
+            for (subClass in (type.classifier as KClass<Buildable>).nestedClasses) {
+                if (subClass.isSubclassOf(Buildable.Builder::class)) {
+                    tmp = subClass as KClass<Buildable.Builder<*>>
+                    break
+                }
+            }
 
-                    property.setter.call(builderClassInstance, arrInstance)
+            if (tmp == null) {
+                continue
+            }
+
+            innerBuilderClass = tmp
+
+            val targetClass = (innerBuilderClass.java.genericSuperclass as ParameterizedType).actualTypeArguments[0] as Class<*>
+            (property as KMutableProperty<*>).setter.call(
+                builderClassInstance,
+                loadConfig(
+                    properties,
+                    targetClass.kotlin as KClass<Buildable>,
+                    "${if (category.isNotEmpty()) '.' else ""}${property.name}"
+                )
+            )
+        } else {
+            val prop = properties.getProperty("$category.${property.name}") ?: continue
+            when(type) {
+                KT_BYTE -> property.setter.call(builderClassInstance, prop.toByte())
+                KT_SHORT -> property.setter.call(builderClassInstance, prop.toShort())
+                KT_INT -> property.setter.call(builderClassInstance, prop.toInt())
+                KT_LONG -> property.setter.call(builderClassInstance, prop.toLong())
+                KT_FLOAT -> property.setter.call(builderClassInstance, prop.toFloat())
+                KT_DOUBLE -> property.setter.call(builderClassInstance, prop.toDouble())
+                KT_STRING -> property.setter.call(builderClassInstance, prop)
+                KT_BYTE_ARRAY -> property.setter.call(builderClassInstance, prop.toByteArray())
+                KT_SHORT_ARRAY -> property.setter.call(builderClassInstance, prop.toShortArray())
+                KT_INT_ARRAY -> property.setter.call(builderClassInstance, prop.toIntArray())
+                KT_LONG_ARRAY -> property.setter.call(builderClassInstance, prop.toLongArray())
+                KT_FLOAT_ARRAY -> property.setter.call(builderClassInstance, prop.toFloatArray())
+                KT_DOUBLE_ARRAY -> property.setter.call(builderClassInstance, prop.toDoubleArray())
+                else -> {
+                    if ((type.javaType as Class<*>).isArray) {
+                        property.setter.call(builderClassInstance, newArray(type, prop))
+                    }
                 }
             }
         }
     }
 
     return builderClassInstance.build()
+}
+
+@PublishedApi
+internal fun newArray(type: KType, prop: String): Array<Any> {
+    val splits = prop.split(',')
+    @Suppress("UNCHECKED_CAST")
+    val arrInstance = java.lang.reflect.Array.newInstance(type.classifier?.javaClass, splits.size) as Array<Any>
+
+    when (type.arguments.first().type) {
+        KT_BYTE -> splits.forEachIndexed { index, value -> arrInstance[index] = value.toByte() }
+        KT_SHORT -> splits.forEachIndexed { index, value -> arrInstance[index] = value.toShort() }
+        KT_INT -> splits.forEachIndexed { index, value -> arrInstance[index] = value.toInt() }
+        KT_LONG -> splits.forEachIndexed { index, value -> arrInstance[index] = value.toLong() }
+        KT_FLOAT -> splits.forEachIndexed { index, value -> arrInstance[index] = value.toFloat() }
+        KT_DOUBLE -> splits.forEachIndexed { index, value -> arrInstance[index] = value.toDouble() }
+        KT_STRING -> splits.forEachIndexed { index, value -> arrInstance[index] = value }
+        else -> throw IllegalStateException("something idk am a programmer") //TODO: Probably lazy way to do it ;)
+    }
+
+    return arrInstance
 }
 
 private fun String.toShortArray() = ShortArray(this.length) { this[it].toShort() }

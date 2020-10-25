@@ -8,11 +8,9 @@ import java.io.File
 import java.lang.Exception
 import java.net.ServerSocket
 import java.net.SocketException
-import java.nio.file.FileSystem
-import java.nio.file.FileSystems
 
 object HttpServerThread : Runnable, AutoCloseable {
-    private val serverSocket = ServerSocket() // ServerSocket(AppConfig["server.port"] as Int)
+    private val serverSocket = ServerSocket(AppConfig.server.port)
     private var clientCounter = 0
 
     init {
@@ -28,8 +26,7 @@ object HttpServerThread : Runnable, AutoCloseable {
                 val client = this.serverSocket.accept()
                 val addr = client.inetAddress
 
-//                if (clientCounter < AppConfig["server.maxConnections"] as Int) {
-                if (clientCounter < -1) {
+                if (clientCounter < AppConfig.server.maxConnections) {
                     Logger.info("$addr has connected")
                     clientCounter++
                     handleClient(client) {
@@ -110,7 +107,7 @@ object RequestHandlerCollection {
 
     operator fun invoke(req: HttpRequest): HttpResponse {
         val res = HttpResponse(HttpResponseHead())
-        this.map[req.head.method]?.get(req.head.path)?.invoke(req, res) ?: File("${System.getProperty("user.dir")}/classes/web", req.head.path).also {
+        this.map[req.head.method]?.get(req.head.path)?.invoke(req, res) ?: File(AppConfig.server.webDir, req.head.path).also {
             if (it.exists()) {
                 req.body = it.readText()
             } else {
