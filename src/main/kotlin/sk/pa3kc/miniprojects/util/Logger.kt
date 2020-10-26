@@ -22,7 +22,7 @@ object Logger {
         override fun toString() = super.name
     }
 
-    private val DATE_FORMAT = SimpleDateFormat("[yyyy/MM/dd HH:mm:ss.SSS]")
+    private val DATE_FORMAT = SimpleDateFormat("[yyyy-MM-dd HH:mm:ss,SSS]")
     private var NOW: String = DATE_FORMAT.format(Date(System.currentTimeMillis()))
         get() {
             field = DATE_FORMAT.format(Date(System.currentTimeMillis()))

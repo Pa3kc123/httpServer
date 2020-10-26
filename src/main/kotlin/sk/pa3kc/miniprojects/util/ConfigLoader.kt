@@ -41,6 +41,7 @@ private fun <T : Buildable> getBuilderClass(cls: KClass<T>): KClass<Buildable.Bu
     throw IllegalArgumentException("${cls.qualifiedName} does not contain Builder class")
 }
 
+@Suppress("UNCHECKED_CAST")
 fun <T : Buildable> loadConfig(properties: Properties, cls: KClass<T>, category: String = ""): T {
     if (!cls.isData) throw IllegalArgumentException("cls must be data class")
 
@@ -65,11 +66,7 @@ fun <T : Buildable> loadConfig(properties: Properties, cls: KClass<T>, category:
                 }
             }
 
-            if (tmp == null) {
-                continue
-            }
-
-            innerBuilderClass = tmp
+            innerBuilderClass = tmp ?: continue
 
             val targetClass = (innerBuilderClass.java.genericSuperclass as ParameterizedType).actualTypeArguments[0] as Class<*>
             (property as KMutableProperty<*>).setter.call(
