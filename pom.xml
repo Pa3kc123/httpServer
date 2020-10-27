@@ -43,6 +43,24 @@
         <version>${kotlin.version}</version>
         <executions>
           <execution>
+            <id>kapt</id>
+            <goals>
+              <goal>kapt</goal>
+            </goals>
+            <configuration>
+              <sourceDirs>
+                <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
+              </sourceDirs>
+              <annotationProcessorPaths>
+                <annotationProcessorPath>
+                  <groupId>sk.pa3kc.mylibrary</groupId>
+                  <artifactId>config-gen-kt</artifactId>
+                  <version>1.0</version>
+                </annotationProcessorPath>
+              </annotationProcessorPaths>
+            </configuration>
+          </execution>
+          <execution>
             <id>compile</id>
             <goals>
               <goal>compile</goal>
@@ -50,7 +68,7 @@
             <configuration>
               <sourceDirs>
                 <source>src/main/kotlin</source>
-                <source>src/main/java</source>
+<!--                <source>src/main/java</source>-->
               </sourceDirs>
             </configuration>
           </execution>
@@ -62,7 +80,7 @@
             </goals>
             <configuration>
               <sourceDirs>
-                <source>src/test/java</source>
+<!--                <source>src/test/java</source>-->
                 <source>src/test/kotlin</source>
               </sourceDirs>
             </configuration>
@@ -152,6 +170,11 @@
       <groupId>org.jetbrains.kotlin</groupId>
       <artifactId>kotlin-reflect</artifactId>
       <version>${kotlin.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>sk.pa3kc.mylibrary</groupId>
+      <artifactId>config-gen-kt</artifactId>
+      <version>1.0</version>
     </dependency>
   </dependencies>
 </project>
