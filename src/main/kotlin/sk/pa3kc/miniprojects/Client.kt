@@ -4,20 +4,20 @@ import java.net.Socket
 import sk.pa3kc.miniprojects.data.HttpRequest
 import sk.pa3kc.miniprojects.thread.HttpServerThread
 import sk.pa3kc.miniprojects.util.Logger
-import sk.pa3kc.miniprojects.util.backgroundJob
 import sk.pa3kc.miniprojects.util.writeInChunks
 import java.lang.Exception
 import java.net.SocketException
 import java.net.SocketTimeoutException
+import kotlin.concurrent.thread
 
-fun handleClient(socket: Socket, finally: (() -> Unit)? = null) = backgroundJob {
-    socket.use {
+fun handleClient(socket: Socket, finally: (Socket) -> Unit) = thread(true) {
+    try {
         val currTime = System.currentTimeMillis()
-        it.soTimeout = AppConfig.server.conTimeout
+        socket.soTimeout = AppConfig.server.conTimeout
 
-        val sis = it.getInputStream()
-        val sos = it.getOutputStream()
-        val sInetAddress = it.inetAddress
+        val sis = socket.getInputStream()
+        val sos = socket.getOutputStream()
+        val sInetAddress = socket.inetAddress
 
         val req = run {
             val httpRequestBuilder = HttpRequest.Builder()
@@ -41,11 +41,11 @@ fun handleClient(socket: Socket, finally: (() -> Unit)? = null) = backgroundJob 
                     is SocketException -> Logger.warn("$sInetAddress socket is closed")
                     else -> e.printStackTrace()
                 }
-                return@use
+                return@thread
             }
 
             if (httpRequestBuilder.isEmpty()) {
-                return@use
+                return@thread
             }
 
             httpRequestBuilder.build()
@@ -61,9 +61,16 @@ fun handleClient(socket: Socket, finally: (() -> Unit)? = null) = backgroundJob 
                 is SocketException -> Logger.warn("$sInetAddress - socket is closed")
                 else -> e.printStackTrace()
             }
-            return@use
+        }
+    } catch (e: Exception) {
+        when(e) {
+            is SocketException -> {}
+            else -> {}
+        }
+    } finally {
+        finally.invoke(socket)
+        if (!socket.isClosed) {
+            socket.close()
         }
     }
-
-    finally?.invoke()
 }

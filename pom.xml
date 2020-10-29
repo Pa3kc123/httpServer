@@ -42,7 +42,7 @@
         <artifactId>kotlin-maven-plugin</artifactId>
         <version>${kotlin.version}</version>
         <executions>
-          <execution>
+          <!--<execution>
             <id>kapt</id>
             <goals>
               <goal>kapt</goal>
@@ -59,7 +59,7 @@
                 </annotationProcessorPath>
               </annotationProcessorPaths>
             </configuration>
-          </execution>
+          </execution>-->
           <execution>
             <id>compile</id>
             <goals>
@@ -171,10 +171,10 @@
       <artifactId>kotlin-reflect</artifactId>
       <version>${kotlin.version}</version>
     </dependency>
-    <dependency>
-      <groupId>sk.pa3kc.mylibrary</groupId>
-      <artifactId>config-gen-kt</artifactId>
-      <version>1.0</version>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>sk.pa3kc.mylibrary</groupId>-->
+<!--      <artifactId>config-gen-kt</artifactId>-->
+<!--      <version>1.0</version>-->
+<!--    </dependency>-->
   </dependencies>
 </project>

@@ -4,9 +4,11 @@ import sk.pa3kc.miniprojects.AppConfig
 import sk.pa3kc.miniprojects.data.*
 import sk.pa3kc.miniprojects.handleClient
 import sk.pa3kc.miniprojects.util.Logger
+import sk.pa3kc.miniprojects.util.deepList
 import java.io.File
 import java.lang.Exception
 import java.net.ServerSocket
+import java.net.Socket
 import java.net.SocketException
 
 object HttpServerThread : Runnable, AutoCloseable {
@@ -24,13 +26,12 @@ object HttpServerThread : Runnable, AutoCloseable {
         while (true) {
             try {
                 val client = this.serverSocket.accept()
-                val addr = client.inetAddress
 
                 if (clientCounter < AppConfig.server.maxConnections) {
-                    Logger.info("$addr has connected")
+                    Logger.info("${client.inetAddress} has connected")
                     clientCounter++
                     handleClient(client) {
-                        Logger.info("$addr has disconnected")
+                        Logger.info("${it.inetAddress} has disconnected")
                         clientCounter--
                     }
                 }
@@ -54,68 +55,60 @@ object SettingsUpdater {
     }
 
     fun static(name: String) {
-        File("${System.getProperty("user.dir")}/classes/web", name).let {
-            Logger.debug("Trying to register site on path ${it.absolutePath}")
-            if (!it.exists()) {
+        File(AppConfig.server.webDir, name).let { root ->
+            Logger.debug("Trying to register site on path ${root.absolutePath}")
+            if (!root.exists()) {
                 Logger.warn("Failed to add static response handler - directory called \"$name\" doesn't exist")
                 return
             }
-            if (it.isFile) {
+            if (root.isFile) {
                 Logger.warn("Failed to add static response handler - directory doesn't exist")
                 return
             }
 
-            it.list()!!.forEach { entry ->
-                if (entry == "index.html") {
-
+            root.deepList()!!.forEach { file ->
+                Logger.debug("Registering GET for $file")
+                RequestHandlerCollection["GET", file] = HttpAction { req, res ->
+                    res.body = File(root, req.head.path).readText(Charsets.UTF_8)
                 }
             }
-
-            TODO("Search for index file in site directory and make static directory handler")
         }
     }
 
     fun get(path: String, action: HttpAction) {
         Logger.debug("Adding new GET handler for path $path")
-        RequestHandlerCollection["GET"][path] = action
+        RequestHandlerCollection["GET", path] = action
     }
 
     fun post(path: String, action: HttpAction) {
         Logger.debug("Adding new POST handler for path $path")
-        RequestHandlerCollection["POST"][path] = action
+        RequestHandlerCollection["POST", path] = action
     }
 }
 
+private typealias KeyType = Pair<String, String>
 object RequestHandlerCollection {
-    private val map = HashMap<String, HashMap<String, HttpAction>>()
+    private val map = HashMap<KeyType, HttpAction>()
 
-    fun remove(method: String): Boolean {
-        val containsKey = this.map.containsKey(method)
+    fun remove(pair: KeyType): Boolean = this.map.remove(pair) != null
 
-        if (containsKey) {
-            this.map.remove(method)
-        }
+    operator fun get(method: String, path: String) = this[Pair(method, path)]
+    operator fun get(key: KeyType): HttpAction? = this.map[key]
 
-        return containsKey
+    operator fun set(method: String, path: String, action: HttpAction) {
+        this[Pair(method, path)] = action
     }
-
-    operator fun get(method: String): HashMap<String, HttpAction> {
-        return this.map[method] ?: HashMap<String, HttpAction>().also {
-            this.map[method] = it
-        }
+    operator fun set(key: KeyType, action: HttpAction) {
+        this.map[key] = action
     }
 
     operator fun invoke(req: HttpRequest): HttpResponse {
         val res = HttpResponse(HttpResponseHead())
-        this.map[req.head.method]?.get(req.head.path)?.invoke(req, res) ?: File(AppConfig.server.webDir, req.head.path).also {
-            if (it.exists()) {
-                req.body = it.readText()
-            } else {
-                res.head.protocol = req.head.protocol
-                res.head.statusCode = 404
-                res.head.reasonPhrase = "NOT FOUND"
-                res.head.headers["Connection"] = "close"
-            }
+        this.map[Pair(req.head.method, req.head.path)]?.invoke(req, res) ?: run {
+            res.head.protocol = req.head.protocol
+            res.head.statusCode = 404
+            res.head.reasonPhrase = "NOT FOUND"
+            res.head.headers["Connection"] = "close"
         }
         return res
     }

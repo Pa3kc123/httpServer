@@ -6,8 +6,6 @@ import java.lang.Exception
 import java.net.SocketException
 import java.net.SocketTimeoutException
 
-fun backgroundJob(job: () -> Unit) = Thread(job).start()
-
 class InputStreamThread(
     private val inputStream: InputStream,
     private val bufferSize: Int = 4096,
