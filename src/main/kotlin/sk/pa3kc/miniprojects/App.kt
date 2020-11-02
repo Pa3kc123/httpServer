@@ -1,10 +1,12 @@
 package sk.pa3kc.miniprojects
 
-import sk.pa3kc.miniprojects.thread.HttpServerThread
+import sk.pa3kc.miniprojects.thread.http.HttpServerImpl
 import java.io.File
 
 class App {
     companion object {
+        object HttpServerThread : HttpServerImpl()
+
         @JvmStatic fun main(args: Array<String>) {
             with(File(CSV_DIR_PATH)) {
                 if (exists()) {
@@ -29,6 +31,8 @@ class App {
 
                 this.static("site1")
             }
+
+            HttpServerThread.isInitialized = true
         }
     }
 }

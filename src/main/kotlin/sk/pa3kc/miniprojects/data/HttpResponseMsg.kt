@@ -4,15 +4,6 @@ import sk.pa3kc.miniprojects.DEFAULT_HTTP_PROTOCOL
 import sk.pa3kc.miniprojects.HTTP_LINE_BREAK
 import sk.pa3kc.miniprojects.HTTP_MESSAGE_DIVIDER
 
-object DefaultHttpResponseHead {
-    var protocol: String = DEFAULT_HTTP_PROTOCOL
-    var statusCode: Int = 200
-    var reasonPhrase: String = "OK"
-    val headers: MutableMap<String, String> = hashMapOf(
-        "Connection" to "close"
-    )
-}
-
 class HttpResponseHead(
     var protocol: String = DefaultHttpResponseHead.protocol,
     var statusCode: Int = DefaultHttpResponseHead.statusCode,
