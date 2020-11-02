@@ -2,7 +2,6 @@ package sk.pa3kc.miniprojects
 
 import java.net.Socket
 import sk.pa3kc.miniprojects.data.HttpRequest
-import sk.pa3kc.miniprojects.thread.HttpServerThread
 import sk.pa3kc.miniprojects.util.Logger
 import sk.pa3kc.miniprojects.util.writeInChunks
 import java.lang.Exception
@@ -51,7 +50,7 @@ fun handleClient(socket: Socket, finally: (Socket) -> Unit) = thread(true) {
             httpRequestBuilder.build()
         }
 
-        val res = HttpServerThread.onHandle(req)
+        val res = App.Companion.HttpServerThread.onHandle(req)
         res.head.headers["Server-Timing"] = "handle;dur=${System.currentTimeMillis() - currTime}"
 
         try {

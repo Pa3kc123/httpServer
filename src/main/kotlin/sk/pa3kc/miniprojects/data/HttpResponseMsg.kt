@@ -1,14 +1,13 @@
 package sk.pa3kc.miniprojects.data
 
-import sk.pa3kc.miniprojects.DEFAULT_HTTP_PROTOCOL
 import sk.pa3kc.miniprojects.HTTP_LINE_BREAK
 import sk.pa3kc.miniprojects.HTTP_MESSAGE_DIVIDER
 
 class HttpResponseHead(
-    var protocol: String = DefaultHttpResponseHead.protocol,
-    var statusCode: Int = DefaultHttpResponseHead.statusCode,
-    var reasonPhrase: String = DefaultHttpResponseHead.reasonPhrase,
-    headers: MutableMap<String, String> = DefaultHttpResponseHead.headers
+    var protocol: String,
+    var statusCode: Int,
+    var reasonPhrase: String,
+    headers: MutableMap<String, String>
 ) : HttpHead(HttpHeadType.RESPONSE, headers) {
     val statusLine: String
         get() = "$protocol $statusCode $reasonPhrase"

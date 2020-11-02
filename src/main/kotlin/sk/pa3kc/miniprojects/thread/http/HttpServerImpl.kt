@@ -2,6 +2,7 @@ package sk.pa3kc.miniprojects.thread.http
 
 import sk.pa3kc.miniprojects.AppConfig
 import sk.pa3kc.miniprojects.data.HttpRequest
+import sk.pa3kc.miniprojects.data.HttpResponse
 import sk.pa3kc.miniprojects.handleClient
 import sk.pa3kc.miniprojects.util.Logger
 import java.io.Closeable
@@ -16,7 +17,7 @@ open class HttpServerImpl : Runnable, Closeable {
     private lateinit var serverSocket: ServerSocket
     private var clientCounter = 0
 
-    var isInitialized = false
+    var initialized = false
         @Throws(IOException::class)
         set(value) {
             if (!field && value) {
@@ -35,8 +36,8 @@ open class HttpServerImpl : Runnable, Closeable {
     }
 
     fun settings(block: SettingsUpdater.() -> Unit) = this.settingsUpdater.apply(block)
-    internal fun onHandle(req: HttpRequest) {
-        this.handler(req)
+    internal fun onHandle(req: HttpRequest): HttpResponse {
+        return this.handler(req)
     }
 
     override fun run() {

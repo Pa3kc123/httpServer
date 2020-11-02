@@ -7,7 +7,8 @@ class App {
     companion object {
         object HttpServerThread : HttpServerImpl()
 
-        @JvmStatic fun main(args: Array<String>) {
+        @JvmStatic
+        fun main(args: Array<String>) {
             with(File(CSV_DIR_PATH)) {
                 if (exists()) {
                     if (isFile) {
@@ -20,7 +21,7 @@ class App {
                 }
             }
 
-            if (args.contains("--preload")) {
+            if ("--preload" in args) {
                 AppConfig
             }
 
@@ -29,10 +30,10 @@ class App {
                     headers["Connection"] = "close"
                 }
 
-                this.static("site1")
+                this.dirServing("site1")
             }
 
-            HttpServerThread.isInitialized = true
+            HttpServerThread.initialized = true
         }
     }
 }

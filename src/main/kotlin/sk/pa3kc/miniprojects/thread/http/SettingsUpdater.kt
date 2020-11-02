@@ -1,7 +1,6 @@
 package sk.pa3kc.miniprojects.thread.http
 
 import sk.pa3kc.miniprojects.AppConfig
-import sk.pa3kc.miniprojects.data.DefaultHttpResponseHead
 import sk.pa3kc.miniprojects.data.HttpAction
 import sk.pa3kc.miniprojects.util.Logger
 import sk.pa3kc.miniprojects.util.deepList
@@ -10,10 +9,10 @@ import java.io.File
 class SettingsUpdater(val handler: RequestHandler) {
     fun defaults(block: DefaultHttpResponseHead.() -> Unit) {
         Logger.debug("Setting new defaults")
-        DefaultHttpResponseHead.apply(block)
+        this.handler.defaultHttpResponseHead.apply(block)
     }
 
-    fun static(name: String) {
+    fun dirServing(name: String) {
         File(AppConfig.server.webDir, name).let { root ->
             Logger.debug("Trying to register site on path ${root.absolutePath}")
             if (!root.exists()) {
@@ -27,8 +26,9 @@ class SettingsUpdater(val handler: RequestHandler) {
 
             for (file in root.deepList()!!) {
                 Logger.debug("Registering GET for $file")
+                val rootPath = root.absolutePath
                 handler["GET", file] = HttpAction { req, res ->
-//                    res.body = File(root, req.head.path).readText(Charsets.UTF_8)
+                    res.body = File(rootPath, req.head.path).readText(Charsets.UTF_8)
                 }
             }
         }

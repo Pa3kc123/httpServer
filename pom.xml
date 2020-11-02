@@ -15,7 +15,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <kotlin.version>1.4.10</kotlin.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
-    <main.class>sk.pa3kc.miniprojects.AppKt</main.class>
+    <main.class>sk.pa3kc.miniprojects.App</main.class>
     <maven.test.skip>true</maven.test.skip>
   </properties>
 
