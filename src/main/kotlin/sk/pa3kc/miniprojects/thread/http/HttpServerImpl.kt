@@ -1,9 +1,9 @@
 package sk.pa3kc.miniprojects.thread.http
 
 import sk.pa3kc.miniprojects.AppConfig
+import sk.pa3kc.miniprojects.Client
 import sk.pa3kc.miniprojects.data.HttpRequest
 import sk.pa3kc.miniprojects.data.HttpResponse
-import sk.pa3kc.miniprojects.handleClient
 import sk.pa3kc.miniprojects.util.Logger
 import java.io.Closeable
 import java.io.IOException
@@ -36,9 +36,7 @@ open class HttpServerImpl : Runnable, Closeable {
     }
 
     fun settings(block: SettingsUpdater.() -> Unit) = this.settingsUpdater.apply(block)
-    internal fun onHandle(req: HttpRequest): HttpResponse {
-        return this.handler(req)
-    }
+    internal fun onHandle(req: HttpRequest): HttpResponse = this.handler(req)
 
     override fun run() {
         while (true) {
@@ -48,7 +46,7 @@ open class HttpServerImpl : Runnable, Closeable {
                 if (clientCounter < AppConfig.server.maxConnections) {
                     Logger.info("${client.inetAddress} has connected")
                     clientCounter++
-                    handleClient(client) {
+                    Client.handleClient(client) {
                         Logger.info("${it.inetAddress} has disconnected")
                         clientCounter--
                     }

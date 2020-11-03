@@ -25,10 +25,10 @@ fun OutputStream.writeInChunks(bytes: ByteArray, offset: Int = 0, length: Int = 
 
     for (i in offset until (offset + length) step buffer.size) {
         arrcpy(
-                bytes,
-                buffer,
-                i,
-                if (i + buffer.size > bytes.size) bytes.size - i else buffer.size
+            bytes,
+            buffer,
+            i,
+            if (i + buffer.size > bytes.size) bytes.size - i else buffer.size
         )
 
         this.write(buffer)
